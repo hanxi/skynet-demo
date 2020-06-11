@@ -65,7 +65,7 @@ function handler.message(fd, msg)
     skynet.error("ws ping from: " .. tostring(fd), msg.."\n")
     -- recv a package, forward it
     local c = connection[fd]
-    local agent = c.agent
+    local agent = c and c.agent
     -- msg is string
     if agent then
         skynet.redirect(agent, c.client, "client", fd, msg)

@@ -16,7 +16,7 @@ skynet.register_protocol {
 	dispatch = function(fd, address, msg)
 		assert(fd == client_fd)	-- You can use fd to reply message
 		skynet.ignoreret()	-- session is fd, don't call skynet.ret
-		skynet.trace()
+		--skynet.trace()
         -- echo simple
         skynet.send(gate, "lua", "response", fd, msg)
         skynet.error(address, msg)
@@ -38,7 +38,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		skynet.trace()
+		--skynet.trace()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)
