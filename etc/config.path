@@ -1,7 +1,7 @@
 root = "./"
 luaservice = root.."service/?.lua;"..root.."skynet/service/?.lua"
 lualoader = root .. "skynet/lualib/loader.lua"
-lua_path = root.."?.lua;"..root.."module/?.lua;"..root.."skynet/lualib/?.lua;"..root.."test/?.lua;"..root.."etc/?.lua"
+lua_path = root.."?.lua;"..root.."lualib/?.lua;"..root.."skynet/lualib/?.lua;"..root.."test/?.lua;"..root.."etc/?.lua"
 lua_cpath = root .. "skynet/luaclib/?.so"
 cpath = root.."skynet/cservice/?.so"
 snax = root.."service/?.lua"

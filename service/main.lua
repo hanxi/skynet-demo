@@ -19,7 +19,7 @@ local function simple_echo_client_service(protocol)
             break
         end
         websocket.ping(ws_id)
-        skynet.sleep(100)
+        skynet.sleep(1)
     end
 end
 
@@ -29,15 +29,26 @@ skynet.start(function()
         skynet.newservice("console")
     end
     skynet.newservice("debug_console",8000)
-    local watchdog = skynet.newservice("ws_watchdog")
+    local ws_watchdog = skynet.newservice("ws_watchdog")
     local protocol = "ws"
-    skynet.call(watchdog, "lua", "start", {
-        port = 8888,
+	local ws_port = 8888
+    skynet.call(ws_watchdog, "lua", "start", {
+        port = ws_port,
         maxclient = max_client,
         nodelay = true,
         protocol = protocol,
     })
-    skynet.error("websocket watchdog listen on", 8888)
-    service.new("websocket_echo_client", simple_echo_client_service, protocol)
+    skynet.error("websocket watchdog listen on", ws_port)
+    --service.new("websocket_echo_client", simple_echo_client_service, protocol)
+
+    local web_watchdog = skynet.newservice("web_watchdog")
+	local web_port = 8889
+    skynet.call(web_watchdog, "lua", "start", {
+        port = web_port,
+		agent_cnt = 20,
+        protocol = "http",
+    })
+    skynet.error("web watchdog listen on", web_port)
+ 
     skynet.exit()
 end)
