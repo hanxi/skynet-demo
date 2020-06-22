@@ -68,8 +68,8 @@ local function gen_interface(protocol, fd)
             SSLCTX_SERVER = tls.newctx()
             -- gen cert and key
             -- openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem -out server-cert.pem
-            local certfile = skynet.getenv("certfile") or "./server.cert"
-            local keyfile = skynet.getenv("keyfile") or "./server_private.key"
+            local certfile = skynet.getenv("certfile") or "./server-cert.pem"
+            local keyfile = skynet.getenv("keyfile") or "./server-key.pem"
             print(certfile, keyfile)
             SSLCTX_SERVER:set_cert(certfile, keyfile)
         end
