@@ -31,7 +31,7 @@ skynet.start(function()
     skynet.newservice("debug_console",8000)
     local ws_watchdog = skynet.newservice("ws_watchdog")
     local protocol = "ws"
-	local ws_port = 8888
+    local ws_port = 8888
     skynet.call(ws_watchdog, "lua", "start", {
         port = ws_port,
         maxclient = max_client,
@@ -42,13 +42,13 @@ skynet.start(function()
     --service.new("websocket_echo_client", simple_echo_client_service, protocol)
 
     local web_watchdog = skynet.newservice("web_watchdog")
-	local web_port = 8889
+    local web_port = 8889
     skynet.call(web_watchdog, "lua", "start", {
         port = web_port,
-		agent_cnt = 20,
-        protocol = "http",
+        agent_cnt = 1,
+        protocol = "https",
     })
     skynet.error("web watchdog listen on", web_port)
- 
+
     skynet.exit()
 end)

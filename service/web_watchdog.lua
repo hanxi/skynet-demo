@@ -9,7 +9,7 @@ function CMD.start(conf)
     protocol = conf.protocol or "http"
 
     local agent_cnt = conf.agent_cnt
-	for i = 1, agent_cnt do
+    for i = 1, agent_cnt do
         agent[i] = skynet.newservice("web_agent", protocol)
     end
 
@@ -28,10 +28,10 @@ function CMD.start(conf)
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
-		local f = assert(CMD[cmd])
-		skynet.ret(skynet.pack(f(subcmd, ...)))
-	end)
+    skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
+        local f = assert(CMD[cmd])
+        skynet.ret(skynet.pack(f(subcmd, ...)))
+    end)
 end)
 
 
