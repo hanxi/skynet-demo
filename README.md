@@ -47,6 +47,8 @@ skynet.send(gate, "lua", "response", fd, msg)
 
 ## guid 模块
 
+算法类似美团的 Leaf-segment 的数据库方案
+
 测试命令：
 
 ```
