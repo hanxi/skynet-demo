@@ -44,3 +44,12 @@ skynet.send(gate, "lua", "response", fd, msg)
 
 [xzhovo/skynet-websocket-gate](https://github.com/xzhovo/skynet-websocket-gate) 的方案有个隐患， `agent` 引用了 `websocket.lua`, 需要维护好 `ws_pool` 。
 
+
+## guid 模块
+
+测试命令：
+
+```
+./skynet/skynet etc/config.test
+```
+

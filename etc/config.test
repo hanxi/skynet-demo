@@ -1,0 +1,13 @@
+include "config.path"
+
+-- 线程个数
+thread = 8
+
+-- 启动配置
+bootstrap = "snlua bootstrap"   -- The service for bootstrap
+start = "test/test"  -- main script
+--start = "skynet/examples/simpleweb"  -- main script
+--daemon = "./run/skynet-demo.pid"
+
+harbor = 0
+
