@@ -1,0 +1,17 @@
+include "config.path"
+
+-- 线程个数
+thread = 8
+
+-- 启动配置
+bootstrap = "snlua bootstrap"   -- The service for bootstrap
+start = "test/test-qqapi"  -- main script
+
+harbor = 0
+
+-- 测试qq接口
+qq_appid = "1111381812"
+qq_secret = "EqnuVTxIWFaV7J1H"
+
+enablessl = true
+

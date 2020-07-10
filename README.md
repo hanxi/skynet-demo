@@ -1,6 +1,14 @@
 # skynet-demo
 
-### websocket watchdog gate agent
+## 编译
+
+```
+sudo apt-get install -y autoconf libssl-dev
+git submodule update --init --recursive
+make build
+```
+
+## websocket watchdog gate agent
 
 fork from https://github.com/xzhovo/skynet-websocket-gate
 
@@ -18,7 +26,11 @@ make linux
 ./skynet/skynet etc/config.cfg
 ```
 
-默认是 `ws` 协议，如果要改成 `wss` 协议，需要编译 skynet 时解开注释 `skynet/Makefile` 里的 `TLS_MODULE=tls` 再重新编译
+默认是 `ws` 协议，如果要改成 `wss` 协议，采用下面指令编译
+
+```
+make linux TLS_MODULE=tls
+```
 
 生成 `wss` 所需的密钥
 
@@ -44,3 +56,92 @@ skynet.send(gate, "lua", "response", fd, msg)
 
 [xzhovo/skynet-websocket-gate](https://github.com/xzhovo/skynet-websocket-gate) 的方案有个隐患， `agent` 引用了 `websocket.lua`, 需要维护好 `ws_pool` 。
 
+
+根据 [mikewu86](https://github.com/mikewu86) 的提议 [issues#1](https://github.com/hanxi/skynet-demo/issues/1) ，已经将 ws_gate 扩展为 master/slave 模式。
+
+## guid 模块
+
+~~算法类似美团的 Leaf-segment 的数据库方案~~
+
+已删除，请采用下面的雪花算法。
+
+## bson 支持整数 key， MongoDB 支持保存整数 key
+
+已删除。
+
+## 集成 zset 模块
+
+`lualib/zset.lua`
+
+
+## 集成声网 SDK
+
+- 声网 SDK 代码 `3rd/agora` : <https://github.com/AgoraIO/Tools>
+- lua 库代码 `lualib-src/lua-agora.cpp`
+
+## 集成腾讯云 SDK
+
+- 腾讯云 SDK 代码 `3rd/tls-sig-api-v2` : <https://github.com/tencentyun/tls-sig-api-v2-cpp>
+- lua 库代码 `lualib-src/lua-tencentyun.cpp`
+- 如果编译报错找不到 fmt 库，可以使用 `git submodule update --init --recursive` 命令更新相关库
+
+测试 SDK 使用下面的指令启动 skynet:
+
+```bash
+./skynet/skynet etc/config.test-sdk
+```
+
+## 集成 lua-cjson
+
+使用 lua 测试：
+
+```bash
+./skynet/3rd/lua/lua test/test-cjson.lua
+```
+
+skynet 中直接用这个测试服务就行：
+
+```bash
+./skynet/skynet etc/config.test
+```
+
+## 雪花算法生成唯一 ID
+
+测试命令
+
+```bash
+./skynet/skynet etc/config.test-snowflake
+```
+
+- 4096 个服务
+- 单个服务 10 毫秒内可以生成 4096 个 ID
+- 支持时间跨服 174 年
+- 时间回拨检查
+
+## QQ api 接口
+
+主要测试 http 的 get 和 post 如何使用，代码位置： `lualib/qqapi.lua`
+
+目前就接了屏蔽字的接口： <https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/sec-check/security.msgSecCheck.html>
+
+测试命令：
+
+```bash
+./skynet/skynet etc/config.test-qqapi
+```
+
+如果是 https 接口，需要在配置中开启 ssl:
+
+```lua
+enablessl = true
+```
+
+当然，编译 skynet 时也需要把 tls 编译进去：
+
+```
+cd skynet && make linux TLS_MODULE=ltls
+```
+
+## QQ 群
+
+群号 677839887

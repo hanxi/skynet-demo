@@ -11,7 +11,7 @@ local function simple_echo_client_service(protocol)
     while true do
         local msg = "hello world!"
         websocket.write(ws_id, msg)
-        print(">: " .. msg)
+        print(">: " .. msg, ws_id)
         local resp, close_reason = websocket.read(ws_id)
         print("<: " .. (resp and resp or "[Close] " .. close_reason))
         if not resp then
@@ -19,7 +19,7 @@ local function simple_echo_client_service(protocol)
             break
         end
         websocket.ping(ws_id)
-        skynet.sleep(1)
+        skynet.sleep(200)
     end
 end
 
@@ -39,14 +39,13 @@ skynet.start(function()
         protocol = protocol,
     })
     skynet.error("websocket watchdog listen on", ws_port)
-    --service.new("websocket_echo_client", simple_echo_client_service, protocol)
 
     local web_watchdog = skynet.newservice("web_watchdog")
     local web_port = 8889
     skynet.call(web_watchdog, "lua", "start", {
         port = web_port,
         agent_cnt = 1,
-        protocol = "https",
+        protocol = "http",
     })
     skynet.error("web watchdog listen on", web_port)
 

@@ -5,15 +5,18 @@ return function (r)
         return 'someone said hello'
     end)
     r:get('/', function(params)
-        return 'index.html'
+        local content = staticfile["index.html"]
+        if content then
+            return content, 200
+        end
+        return "404 Not found", 404
     end)
-    r:get('/static/:fname.:suffix', function(params)
+    r:get('/static/:filename', function(params)
         print("static")
         for k,v in pairs(params) do
             print(type(k),#k,k,v)
         end
-        local filename = string.format("%s.%s", params.fname, params.suffix)
-        local content = staticfile[filename]
+        local content = staticfile[params.filename]
         if content then
             return content
         end

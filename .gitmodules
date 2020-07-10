@@ -2,3 +2,15 @@
 [submodule "skynet"]
 	path = skynet
     url = https://github.com/cloudwu/skynet.git
+[submodule "3rd/lua-zset"]
+	path = 3rd/lua-zset
+	url = https://github.com/xjdrew/lua-zset.git
+[submodule "3rd/agora"]
+	path = 3rd/agora
+	url = https://github.com/AgoraIO/Tools.git
+[submodule "3rd/tls-sig-api-v2"]
+	path = 3rd/tls-sig-api-v2
+	url = https://github.com/tencentyun/tls-sig-api-v2-cpp.git
+[submodule "3rd/lua-cjson"]
+	path = 3rd/lua-cjson
+	url = https://github.com/cloudwu/lua-cjson.git
