@@ -2,12 +2,14 @@ local skynet = require "skynet"
 
 local CMD = {}
 local SOCKET = {}
-local gate
+local master_gate
 local agent = {}
 local protocol
+local fd2gate = {}
 
-function SOCKET.open(fd, addr)
+function SOCKET.open(fd, addr, gate)
     skynet.error("New client from : " .. addr)
+    fd2gate[fd] = gate
     agent[fd] = skynet.newservice("ws_agent")
     skynet.call(agent[fd], "lua", "start", {
         gate = gate,
@@ -22,7 +24,11 @@ local function close_agent(fd)
     local a = agent[fd]
     agent[fd] = nil
     if a then
-        skynet.call(gate, "lua", "kick", fd)
+        local gate = fd2gate[fd]
+        if gate then
+            skynet.call(gate, "lua", "kick", fd)
+            fd2gate[fd] = nil
+        end
         -- disconnect never return
         skynet.send(a, "lua", "disconnect")
     end
@@ -49,7 +55,7 @@ end
 
 function CMD.start(conf)
     protocol = conf.protocol
-    skynet.call(gate, "lua", "open" , conf)
+    skynet.call(master_gate, "lua", "open" , conf)
 end
 
 function CMD.close(fd)
@@ -68,6 +74,6 @@ skynet.start(function()
         end
     end)
 
-    gate = skynet.newservice("ws_gate")
+    master_gate = skynet.newservice("ws_gate")
 end)
 
