@@ -18,7 +18,11 @@ make linux
 ./skynet/skynet etc/config.cfg
 ```
 
-默认是 `ws` 协议，如果要改成 `wss` 协议，需要编译 skynet 时解开注释 `skynet/Makefile` 里的 `TLS_MODULE=tls` 再重新编译
+默认是 `ws` 协议，如果要改成 `wss` 协议，采用下面指令编译
+
+```
+make linux TLS_MODULE=tls
+```
 
 生成 `wss` 所需的密钥
 
@@ -44,6 +48,8 @@ skynet.send(gate, "lua", "response", fd, msg)
 
 [xzhovo/skynet-websocket-gate](https://github.com/xzhovo/skynet-websocket-gate) 的方案有个隐患， `agent` 引用了 `websocket.lua`, 需要维护好 `ws_pool` 。
 
+
+根据 [mikewu86](https://github.com/mikewu86) 的提议 [issues#1](https://github.com/hanxi/skynet-demo/issues/1) ，已经将 ws_gate 扩展为 master/slave 模式。
 
 ## guid 模块
 
