@@ -68,7 +68,7 @@ skynet.send(gate, "lua", "response", fd, msg)
 ./skynet/skynet etc/config.test
 ```
 
-详细讲解见： http://blog.hanxi.info/?p=48
+详细讲解见： https://blog.hanxi.info/?p=48
 
 ## bson 支持整数 key， MongoDB 支持保存整数 key
 
@@ -128,7 +128,7 @@ end
 测试命令：
 
 ```
-./skynet/skynet etc/config.test
+./skynet/skynet etc/config.test3
 ```
 
 ## 集成 zset 模块
