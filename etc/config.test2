@@ -6,8 +6,6 @@ thread = 8
 -- 启动配置
 bootstrap = "snlua bootstrap"   -- The service for bootstrap
 start = "test/test2"  -- main script
---start = "skynet/examples/simpleweb"  -- main script
---daemon = "./run/skynet-demo.pid"
 
 harbor = 0
 

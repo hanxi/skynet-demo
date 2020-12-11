@@ -1,6 +1,13 @@
 # skynet-demo
 
-### websocket watchdog gate agent
+## 编译
+
+```
+git submodule update --init
+make build
+```
+
+## websocket watchdog gate agent
 
 fork from https://github.com/xzhovo/skynet-websocket-gate
 
@@ -60,4 +67,71 @@ skynet.send(gate, "lua", "response", fd, msg)
 ```
 ./skynet/skynet etc/config.test
 ```
+
+详细讲解见： http://blog.hanxi.info/?p=48
+
+## bson 支持整数 key， MongoDB 支持保存整数 key
+
+- 整数 key 将加前缀 `_i_` 保存到数据库
+- 加载数据库数据遇到 key 的字段前缀为 `_i_` 时，删除前缀然后转为整数 key
+- 需要打包数组的 table 时，需要特殊处理
+
+```lua
+local bson_array_mt = {
+    __len = function (a)
+        return rawlen(a)
+    end,
+}
+
+-- 设置坐标
+function M.set_location(uid, longitude, latitude)
+    local location = {longitude, latitude}
+    setmetatable(location, bson_array_mt)
+    local ret = user_tbl:findAndModify({query = {uid = uid}, update = {["$set"] = {location = location}}})
+    local result = math.floor(ret.ok)
+    if result ~= 1 then
+        return false
+    end
+    return true
+end
+
+-- 查找附加的人
+function M.get_near_player(longitude, latitude, limit)
+    local pipeline = {
+        {
+            ["$geoNear"] = {
+                near = setmetatable({ longitude, latitude }, bson_array_mt),
+                distanceField = "location",
+                maxDistance = 2000,
+                query = {location = {["$exists"] = true}},
+            },
+        },
+        {
+            ["$project"] = {
+                uid = 1,
+                _id = 0,
+            },
+        },
+        {
+            ["$limit"] = limit or 10,
+        },
+    }
+    setmetatable(pipeline, bson_array_mt)
+    local ret = db:runCommand("aggregate", "user", "pipeline", pipeline, "cursor", {})
+    log.debug("get_near_player:", util_table.tostring(ret))
+    if ret then
+        return ret.cursor.firstBatch
+    end
+end
+```
+
+测试命令：
+
+```
+./skynet/skynet etc/config.test
+```
+
+## 集成 zset 模块
+
+`lualib/zset.lua`
 
