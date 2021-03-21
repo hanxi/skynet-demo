@@ -7,7 +7,7 @@ return function (r)
     r:get('/', function(params)
         local content = staticfile["index.html"]
         if content then
-            return content
+            return content, 200
         end
         return "404 Not found", 404
     end)
