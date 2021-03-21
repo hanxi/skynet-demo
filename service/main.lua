@@ -45,7 +45,7 @@ skynet.start(function()
     skynet.call(web_watchdog, "lua", "start", {
         port = web_port,
         agent_cnt = 1,
-        protocol = "https",
+        protocol = "http",
     })
     skynet.error("web watchdog listen on", web_port)
 

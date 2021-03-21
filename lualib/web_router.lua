@@ -12,7 +12,7 @@ return function (r)
         for k,v in pairs(params) do
             print(type(k),#k,k,v)
         end
-        local content = staticfile[filename]
+        local content = staticfile[params.filename]
         if content then
             return content
         end
