@@ -9,6 +9,18 @@ local router = require 'router'
 
 local r = router.new()
 web_router(r)
+-- 通用的
+r:match({
+    GET = {
+        ["/hello"]       = function(params) return "someone said hello" end,
+        ["/hello/:name"] = function(params) return "hello, " .. params.name end
+    },
+    POST = {
+        ["/app/:id/comments"] = function(params)
+            return "comment " .. params.comment .. " created on app " .. params.id
+        end
+    }
+})
 
 local protocol = ...
 protocol = protocol or "http"
@@ -23,19 +35,6 @@ local function response(id, write, ...)
 end
 
 local function handle_request(id, url, method, header, body, interface)
-    -- 通用的
-    r:match({
-        GET = {
-            ["/hello"]       = function(params) return "someone said hello" end,
-            ["/hello/:name"] = function(params) return "hello, " .. params.name end
-        },
-        POST = {
-            ["/app/:id/comments"] = function(params)
-                return "comment " .. params.comment .. " created on app " .. params.id
-            end
-        }
-    })
-
     local path, query_str = urllib.parse(url)
     local query
     if query_str then
