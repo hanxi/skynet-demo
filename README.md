@@ -136,6 +136,22 @@ end
 `lualib/zset.lua`
 
 
+## 集成声网 SDK
+
+- 声网 SDK 代码 `3rd/agora` : <https://github.com/AgoraIO/Tools>
+- lua 库代码 `lualib-src/lua-agora.cpp`
+
+## 集成腾讯云 SDK
+
+- 腾讯云 SDK 代码 `3rd/tls-sig-api-v2` : <https://github.com/tencentyun/tls-sig-api-v2-cpp>
+- lua 库代码 `lualib-src/lua-tencentyun.cpp`
+- 如果编译报错找不到 fmt 库，可以使用 `git submodule update --init --recursive` 命令更新相关库
+
+测试 SDK 使用下面的指令启动 skynet:
+
+```bash
+./skynet/skynet etc/config.test-sdk
+```
 
 ## QQ 群
 

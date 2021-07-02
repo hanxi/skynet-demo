@@ -21,7 +21,14 @@ $(LUA_CLIB_PATH)/skiplist.so : 3rd/lua-zset/skiplist.h 3rd/lua-zset/skiplist.c 3
 $(LUA_CLIB_PATH)/bson.so : lualib-src/lua-bson.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(SHARED) -Iskynet/skynet-src $^ -o $@
 
-LUA_CLIB = skiplist bson
+$(LUA_CLIB_PATH)/agora.so : lualib-src/lua-agora.cpp | $(LUA_CLIB_PATH)
+	g++ -std=c++0x $(CFLAGS) $(SHARED) -I3rd/agora/DynamicKey/AgoraDynamicKey $^ -o $@ -lz -lcrypto
+
+TENCENTYUN_FLAG = -DFMT_HEADER_ONLY -DRAPIDJSON_HAS_STDSTRING=1 -DUSE_OPENSSL
+$(LUA_CLIB_PATH)/tencentyun.so : lualib-src/lua-tencentyun.cpp 3rd/tls-sig-api-v2/src/tls_sig_api_v2.cpp | $(LUA_CLIB_PATH)
+	g++ -std=c++0x $(CFLAGS) $(SHARED) $(TENCENTYUN_FLAG) -I3rd/tls-sig-api-v2 -I3rd/tls-sig-api-v2/src -I3rd/tls-sig-api-v2/third/fmt/include -I3rd/tls-sig-api-v2/third/rapidjson/include $^ -o $@ -lz -lcrypto
+
+LUA_CLIB = skiplist bson agora tencentyun
 
 build: \
   $(LUA_CLIB_PATH) \
