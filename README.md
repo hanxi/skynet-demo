@@ -160,6 +160,14 @@ cd skynet && make linux TLS_MODULE=ltls
 
 目前的方案只实现了手动调用 `staticdata.update(arrlist)` 接口实现热更配置。 可以优化成自动定时检测某个文件的时间，文件内容就是待热更的配置文件列表，以后有空再补上吧。
 
+接口：
+
+- `staticdata.preload()` 在 preload 中调用，用于给每个服务注册一个 debug 命令
+- `staticdata.init(servicekey)` 在使用配置的服务启动时调用，用于预加载所有需要的配置，`servicekey` 用于标记服务使用了哪些配置文件，在 `data/service2datalist.lua` 中配置。
+- `staticdata.loadfiles()` 在进程入口调用，用于加载所有的配置文件
+- `staticdata.get(name)` 取配置数据，`name` 为配置的文件名，不能缓存在本地，每次都需要重新读取
+- `staticdata.update(arrlist)` 热更配置， `arrlist` 为待热更的文件列表
+
 ## QQ 群
 
 群号 677839887

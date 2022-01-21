@@ -23,6 +23,7 @@ function M.get(name)
     return g_static[name]
 end
 
+-- 加载所有用到的配置
 function M.loadfiles()
     local skynet = require "skynet"
     local sharetable = require "skynet.sharetable"
