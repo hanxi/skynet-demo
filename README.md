@@ -142,6 +142,24 @@ enablessl = true
 cd skynet && make linux TLS_MODULE=ltls
 ```
 
+## 策划热更
+
+- 使用 [ShareTable](https://github.com/cloudwu/skynet/wiki/ShareData#sharetable) 实现
+- 参考这个讨论 [discussions/1429](https://github.com/cloudwu/skynet/discussions/1429)
+- 代码位置: `lualib/staticdata.lua`
+
+测试命令：
+
+```bash
+./skynet/skynet etc/config.teststaticdata
+```
+
+然后在 30 秒内修改 `data/test/data1.lua` 和 `data/test/data2.lua` 文件内容。
+
+方案采用的是只使用 `sharetable.query` 接口更新本地引用，所以使用配置的地方都不能缓存配置数据，使用数据都需要从 root 取。
+
+目前的方案只实现了手动调用 `staticdata.update(arrlist)` 接口实现热更配置。 可以优化成自动定时检测某个文件的时间，文件内容就是待热更的配置文件列表，以后有空再补上吧。
+
 ## QQ 群
 
 群号 677839887

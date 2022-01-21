@@ -1,0 +1,12 @@
+include "config.path"
+
+-- 线程个数
+thread = 8
+
+-- 启动配置
+bootstrap = "snlua bootstrap"   -- The service for bootstrap
+start = "test/teststaticdata"  -- main script
+
+harbor = 0
+
+preload = "./test/preload.lua"
