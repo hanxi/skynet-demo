@@ -154,7 +154,7 @@ cd skynet && make linux TLS_MODULE=ltls
 ./skynet/skynet etc/config.teststaticdata
 ```
 
-然后在 30 秒内修改 `data/test/data1.lua` 和 `data/test/data2.lua` 文件内容。
+然后在 30 秒内修改 `data/test/data1.lua` 和 `data/test/data2.lua` 文件内容。Excel 配置文件导出可以使用工具 [hanxi/export.py](https://github.com/hanxi/export.py) 。
 
 方案采用的是只使用 `sharetable.query` 接口更新本地引用，所以使用配置的地方都不能缓存配置数据，使用数据都需要从 root 取。
 
