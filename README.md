@@ -142,7 +142,7 @@ enablessl = true
 cd skynet && make linux TLS_MODULE=ltls
 ```
 
-## 策划热更
+## 策划导表配置热更
 
 - 使用 [ShareTable](https://github.com/cloudwu/skynet/wiki/ShareData#sharetable) 实现
 - 参考这个讨论 [discussions/1429](https://github.com/cloudwu/skynet/discussions/1429)
