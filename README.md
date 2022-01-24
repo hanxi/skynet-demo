@@ -168,6 +168,79 @@ cd skynet && make linux TLS_MODULE=ltls
 - `staticdata.get(name)` 取配置数据，`name` 为配置的文件名，不能缓存在本地，每次都需要重新读取
 - `staticdata.update(arrlist)` 热更配置， `arrlist` 为待热更的文件列表
 
+## 无侵入式扩展官方的 debug_console 服务
+
+- 无侵入式修改
+- 采用 inject 的方式
+- 代码路径： `lualib/debug_console_inject.lua`
+
+使用示例：
+
+```lua
+local debug_console_inject = require "debug_console_inject"
+local address = skynet.newservice("debug_console",8000)
+debug_console_inject(address)
+```
+
+inject 的代码是直接以字符串的形式写的，如果需要扩展大量命令则建议采用 debug_console 的 inject 命令读取文件的方式。
+
+比如这样：
+
+```lua
+local skynet = require "skynet"
+return function(address)
+    local filename = "lualib/debug_console_inject_source.lua"
+    local f = io.open(filename, "rb")
+    if not f then
+        skynet.error("Can't open " .. filename)
+        return
+    end
+    local source = f:read "*a"
+    f:close()
+    skynet.call(address, "debug", "RUN", source, filename)
+end
+```
+
+### 测试
+
+启动服务:
+
+```bash
+./skynet/skynet etc/config.test
+```
+
+连接 debug console: 
+
+```txt
+rlwrap nc 127.0.0.1 8000
+Welcome to skynet console
+stat
+:00000004       cpu:0.000661    message:7       mqlen:0 task:0  xmem:48.40 Kb (snlua cdummy)
+:00000006       cpu:0.000521    message:5       mqlen:0 task:0  xmem:44.22 Kb (snlua datacenterd)
+:00000007       cpu:0.001139    message:5       mqlen:0 task:0  xmem:52.39 Kb (snlua service_mgr)
+:00000009       cpu:0.001043    message:6       mqlen:0 task:1  xmem:57.96 Kb (snlua console)
+:0000000a       cpu:0.00356     message:16      mqlen:0 task:1  xmem:108.73 Kb (snlua debug_console 8000)
+:0000000b       cpu:0.000419    message:8       mqlen:0 task:0  xmem:44.92 Kb (snlua ws_watchdog)
+:0000000c       cpu:0.001591    message:23      mqlen:0 task:0  xmem:67.62 Kb (snlua ws_gate)
+:0000000d       cpu:0.00049     message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-1)
+:0000000e       cpu:0.000633    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-2)
+:0000000f       cpu:0.000443    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-3)
+:00000010       cpu:0.000564    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-4)
+:00000011       cpu:0.000518    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-5)
+:00000012       cpu:0.000437    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-6)
+:00000013       cpu:0.000502    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-7)
+:00000014       cpu:0.000417    message:6       mqlen:0 task:0  xmem:65.76 Kb (snlua ws_gate .ws_gate .ws_gate-slave-8)
+:00000015       cpu:0.000663    message:8       mqlen:0 task:0  xmem:55.67 Kb (snlua web_watchdog)
+:00000016       cpu:0.000974    message:5       mqlen:0 task:0  xmem:63.23 Kb (snlua web_agent http)
+<CMD OK>
+```
+
+示例中修改了 stat 命令，拼接了原有 stat 命令和 mem 命令的内容。
+
+缘起： https://github.com/cloudwu/skynet/issues/1262
+
+**这个方法只建议在新增命令时使用，原有命令组合能实现的还是写另外的客户端脚本执行 http 接口来组合来实现。**
+
 ## QQ 群
 
 群号 677839887

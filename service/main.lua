@@ -23,12 +23,14 @@ local function simple_echo_client_service(protocol)
     end
 end
 
+local debug_console_inject = require "debug_console_inject"
 skynet.start(function()
     skynet.error("Server start")
     if not skynet.getenv "daemon" then
         skynet.newservice("console")
     end
-    skynet.newservice("debug_console",8000)
+    local address = skynet.newservice("debug_console",8000)
+    debug_console_inject(address)
     local ws_watchdog = skynet.newservice("ws_watchdog")
     local protocol = "ws"
     local ws_port = 8888
