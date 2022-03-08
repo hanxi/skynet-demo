@@ -14,7 +14,7 @@ SHARED := -fPIC --shared
 $(LUA_CLIB_PATH) :
 	mkdir $(LUA_CLIB_PATH)
 
-$(LUA_CLIB_PATH)/skiplist.so : 3rd/lua-zset/skiplist.h 3rd/lua-zset/skiplist.c 3rd/lua-zset/lua-skiplist.c
+$(LUA_CLIB_PATH)/skiplist.so : 3rd/lua-zset/skiplist.h 3rd/lua-zset/skiplist.c 3rd/lua-zset/lua-skiplist.c | $(LUA_CLIB_PATH)
 	$(CC)  $(CFLAGS)  -I$(LUA_INC) $(SHARED)  $^ -o $@
 	cp 3rd/lua-zset/zset.lua lualib/zset.lua
 
@@ -28,7 +28,11 @@ TENCENTYUN_FLAG = -DFMT_HEADER_ONLY -DRAPIDJSON_HAS_STDSTRING=1 -DUSE_OPENSSL
 $(LUA_CLIB_PATH)/tencentyun.so : lualib-src/lua-tencentyun.cpp 3rd/tls-sig-api-v2/src/tls_sig_api_v2.cpp | $(LUA_CLIB_PATH)
 	g++ -std=c++0x $(CFLAGS) $(SHARED) $(TENCENTYUN_FLAG) -I3rd/tls-sig-api-v2 -I3rd/tls-sig-api-v2/src -I3rd/tls-sig-api-v2/third/fmt/include -I3rd/tls-sig-api-v2/third/rapidjson/include $^ -o $@ -lz -lcrypto
 
-LUA_CLIB = skiplist cjson agora tencentyun
+$(LUA_CLIB_PATH)/snapshot.so : 3rd/lua-snapshot/snapshot.c | $(LUA_CLIB_PATH)
+	$(CC) $(CFLAGS) $(SHARED) $^ -o $@
+	cp 3rd/lua-snapshot/snapshot_utils.lua lualib/snapshot_utils.lua
+
+LUA_CLIB = skiplist cjson agora tencentyun snapshot
 
 build: \
   $(LUA_CLIB_PATH) \

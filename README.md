@@ -206,7 +206,7 @@ end
 启动服务:
 
 ```bash
-./skynet/skynet etc/config.test
+./skynet/skynet etc/config.cfg
 ```
 
 连接 debug console: 
@@ -240,6 +240,97 @@ stat
 缘起： https://github.com/cloudwu/skynet/issues/1262
 
 **这个方法只建议在新增命令时使用，原有命令组合能实现的还是写另外的客户端脚本执行 http 接口来组合来实现。**
+
+## 集成 lua-snapshot 工具查看 Lua 内存数据变化
+
+代码在 `3rd/lua-snapshot` ，集成的代码在 `lualib/extern_debug.lua` ，专门用于扩展第三方 debug 命令。
+
+### 如何使用？
+
+当前的用法是采用按需注入的方式，遇到需要排查的服务时才对服务进行初始化额外的 debug 命令。
+
+*也可以按上面注入 debug_console 的方式新增一个额外的命令从 console 里动态使用。有需要的可以自己实现或者提 issues 。*
+
+参考 `test/testexterndebug.lua` 测试用例， 假设已经存在一个服务 `test_service` 的地址为 `address` :
+
+接下来对其注入 debug 命令 `SNAPSHOT` , 使用 `RUN` 命令加载一段代码即可。
+
+```lua
+    local source = [[
+        local extern_debug = require "extern_debug"
+        extern_debug.init()
+    ]]
+    local ok, output = skynet.call(address, "debug", "RUN", source, "inject_extern_debug")
+    if ok == false then
+        error(output)
+    end
+    skynet.error(output)
+```
+
+假设服务 `test_service` 有 `tes1` 和 `test2` 两个接口，这两个接口分别会给变量 `t` 新增两个元素 `t.t1` 和 `t.t2` :
+
+```lua
+local function test_service()
+    local skynet = require "skynet"
+
+    local CMD = {}
+    local t = {}
+    function CMD.test1()
+        local t1 = {
+            a = 1,
+            b = 2,
+        }
+        t.t1 = t1
+        skynet.error("in test1")
+    end
+    function CMD.test2()
+        local t2 = {
+            c = 3,
+        }
+        t.t2 = t2
+        skynet.error("in test2")
+    end
+    skynet.dispatch("lua", function(_,source,cmd,...)
+        local f = CMD[cmd]
+        if f then
+            skynet.ret(skynet.pack(f(...)))
+        else
+            log.error(string.format("Unknown cmd:%s, source:%s", cmd, source))
+        end
+    end)
+end
+```
+
+使用接口测试，分别在调用 test1 前，调用 test1 后，调用 test2 后执行 `SNAPSHOT` 指令：
+
+```lua
+    local ret0 = skynet.call(address, "debug", "SNAPSHOT")
+    skynet.error("ret0:", util_table.tostring(ret0))
+
+    skynet.call(address, "lua", "test1")
+    local ret1 = skynet.call(address, "debug", "SNAPSHOT")
+    skynet.error("ret1:", util_table.tostring(ret1))
+
+    skynet.call(address, "lua", "test2")
+    local ret2 = skynet.call(address, "debug", "SNAPSHOT")
+    skynet.error("ret2:", util_table.tostring(ret2))
+```
+
+客户看出 test1 前快照表是空的， test1 后新增了 snapshot 相关变量以及 `t1`， test2 后新增了变量 `t2` :
+
+```txt
+[:00000008] ret0: {}
+[:0000000b] in test1
+[:00000008] ret1: {["7f5067492b40"]={val_type="table",parent="7f5067492f00",extra="t1",key="t1",},["7f50674cc300"]={val_type="table",parent="7f5067493f80",extra="old_snapshot",key="old_snapshot",},["7f50674cc480"]={val_type="table",parent="7f506748b2c0",extra="_UBOX*",key="_UBOX*",},}
+[:0000000b] in test2
+[:00000008] ret2: {["7f50674a72c0"]={val_type="table",parent="7f5067492f00",extra="t2",key="t2",},["7f50674cc800"]={val_type="table",parent="7f5067493f80",extra="old_snapshot",key="old_snapshot",},}
+[:00000002] KILL self
+```
+
+运行测试
+```bash
+./skynet/skynet etc/config.testexterndebug
+```
 
 ## QQ 群
 

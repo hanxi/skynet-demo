@@ -14,3 +14,6 @@
 [submodule "3rd/lua-cjson"]
 	path = 3rd/lua-cjson
 	url = https://github.com/cloudwu/lua-cjson.git
+[submodule "3rd/lua-snapshot"]
+	path = 3rd/lua-snapshot
+	url = https://github.com/cloudwu/lua-snapshot.git
