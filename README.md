@@ -243,6 +243,8 @@ stat
 
 ## 集成 lua-snapshot 工具查看 Lua 内存数据变化
 
+一般用于排查 Lua 内存泄漏的问题。
+
 代码在 `3rd/lua-snapshot` ，集成的代码在 `lualib/extern_debug.lua` ，专门用于扩展第三方 debug 命令。
 
 ### 如何使用？
