@@ -332,6 +332,8 @@ end
 ./skynet/skynet etc/config.testexterndebug
 ```
 
+缘起： https://github.com/cloudwu/skynet/pull/848
+
 ## QQ 群
 
 群号 677839887
