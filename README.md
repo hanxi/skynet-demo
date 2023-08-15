@@ -336,6 +336,26 @@ end
 
 缘起： https://github.com/cloudwu/skynet/pull/848
 
+## 服务退出管理
+
+代码实现： `lualib/service.lua`
+
+- `atexit(func)` 接口用于注册服务退出时执行的函数，类似 C 语言的 atexit 接口，先注册的函数后执行
+- `exit(waittime, timeout1, timeout2)` 接口用于退出服务
+   - waittime 等待退出时间（单位秒） 默认 0 秒
+   - timeout1 执行 atexit 的超时时间（单位秒） 默认 5 秒
+   - timeout2 执行 skynet.exit 的超时时间（单位秒） 默认 5 秒
+
+### 测试
+
+```bash
+./skynet/skynet etc/config.test-exit
+```
+
+- test1 为正常退出的用例
+- test2 为 timeout1 超时用例
+- test3 为 timeout2 超时用例
+
 ## QQ 群
 
 群号 677839887
