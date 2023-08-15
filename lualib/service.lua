@@ -22,13 +22,13 @@ local function mng_service()
 	end
 
 	skynet.dispatch("lua", function(_, source, cmd, ...)
-        local f = CMD[cmd]
-        if f then
-            skynet.ret(skynet.pack(f(source, ...)))
-        else
-            log.error(string.format("Unknown cmd:%s, source:%s", cmd, source))
-        end
-    end)
+		local f = CMD[cmd]
+		if f then
+			skynet.ret(skynet.pack(f(source, ...)))
+		else
+			log.error(string.format("Unknown cmd:%s, source:%s", cmd, source))
+		end
+	end)
 
 	-- 超时强制退出检查
 	local function check_exit_timeout()
@@ -52,7 +52,7 @@ local function mng_service()
 	end
 
 	-- 5 秒心跳
-    local HEARTBEAT_TIME = 5 * 100
+	local HEARTBEAT_TIME = 5 * 100
 	local function heartbeat_init()
 		local function heartbeat()
 			check_exit_timeout()
@@ -82,17 +82,17 @@ local service = require "skynet.service"
 local log = require "log"
 
 local function load_service(t, key)
-    if key == "address" then
+	if key == "address" then
 		local info = debug.getinfo(mng_service, "u")
-        t.address = service.new("servicemng", mng_service)
-        return t.address
-    else
-        return nil
-    end
+		t.address = service.new("servicemng", mng_service)
+		return t.address
+	else
+		return nil
+	end
 end
 
 local servicemng = setmetatable ({} , {
-    __index = load_service,
+	__index = load_service,
 })
 
 
