@@ -356,6 +356,10 @@ end
 - test2 为 timeout1 超时用例
 - test3 为 timeout2 超时用例
 
+## 排行榜
+
+一个基于 [wlua](https://github.com/hanxi/wlua) 实现的排行榜，内核还是 skynet 的。 提供 http 接口使用。 地址： [rank](https://github.com/hanxi/rank)
+
 ## QQ 群
 
 群号 677839887
