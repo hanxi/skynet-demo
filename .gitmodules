@@ -17,3 +17,6 @@
 [submodule "3rd/lua-snapshot"]
 	path = 3rd/lua-snapshot
 	url = https://github.com/cloudwu/lua-snapshot.git
+[submodule "3rd/lua-dirty-mongo"]
+	path = 3rd/lua-dirty-mongo
+	url = https://github.com/hanxi/lua-dirty-mongo.git

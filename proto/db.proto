@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message role {
+    int64 uid = 1;
+    string acc = 2;
+    uint32 sign_cnt = 3;
+}
