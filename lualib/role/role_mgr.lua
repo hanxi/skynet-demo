@@ -21,7 +21,7 @@ function M.find_create_role(acc)
 	end
 
 	uid = role_data.uid
-	local dirty_data = dirtydb.new("role", role_data, role_db.get_save_cb())
+	local dirty_data = dirtydb.new("role", role_data, role_db.get_save_cb(uid))
 	acc2uid[acc] = uid
 	local role = role_cls.new(uid, dirty_data)
 	roles[uid] = role
@@ -43,7 +43,7 @@ function M.get_role(uid)
 	end
 
 	local acc = role_data.acc
-	local dirty_data = dirtydb.new("role", role_data, role_db.get_save_cb())
+	local dirty_data = dirtydb.new("role", role_data, role_db.get_save_cb(uid))
 	acc2uid[acc] = uid
 	local role = role_cls.new(uid, dirty_data)
 	roles[uid] = role

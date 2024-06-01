@@ -1,10 +1,58 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-    <head>
-        <meta charset="UTF-8">
-        <title>helloworld</title>
-    </head>
-    <body>
-        <h1>hello world</h1>
-    </body>
+  <head>
+    <title>WebSocket 示例</title>
+    <style>
+        #inputBox, #outputBox {
+            width: 98%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        #sendButton {
+            width: 100px;
+            height: 30px;
+        }
+    </style>
+    <script>
+    window.onload = function() {
+      var loc = window.location, new_uri;
+      var new_port = 8888; // WebSocket 端口号
+      if (loc.protocol === "https:") {
+        new_uri = "wss:";
+      } else {
+        new_uri = "ws:";
+      }
+      new_uri += "//" + loc.hostname + ":" + new_port;
+      new_uri += loc.pathname;
+      console.log(new_uri);
+
+      var ws = new WebSocket(new_uri);
+      var sendButton = document.getElementById('sendButton');
+      var inputBox = document.getElementById('inputBox');
+      var outputBox = document.getElementById('outputBox');
+
+      ws.onmessage = function(event) {
+        outputBox.value = event.data;
+      };
+
+      sendButton.onclick = function() {
+        var message = inputBox.value;
+        try {
+          JSON.parse(message);
+        } catch (e) {
+          alert('请输入有效的JSON字符串');
+          return;
+        }
+        ws.send(message);
+      };
+    };
+    </script>
+  </head>
+  <body>
+    <textarea id="inputBox" placeholder="在此输入JSON字符串"></textarea>
+    <textarea id="outputBox" placeholder="服务器返回的数据将显示在此处" readonly></textarea>
+    <button id="sendButton">发送</button>
+  </body>
 </html>
+

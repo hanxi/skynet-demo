@@ -41,7 +41,7 @@ build: \
 
 schema:
 	cd 3rd/lua-dirty-mongo/tools && make LUA_INC=$(LUA_INC)
-	../skynet/3rd/lua/lua 3rd/lua-dirty-mongo/tools/gen_schema.lua proto/db.proto lualib/schema.lua
+	./skynet/3rd/lua/lua 3rd/lua-dirty-mongo/tools/gen_schema.lua proto/db.proto lualib/schema.lua
 
 clean:
 	cd skynet && $(MAKE) clean

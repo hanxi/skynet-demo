@@ -14,6 +14,7 @@ setmetatable(role_type, {
 })
 role.uid = number
 role.acc = string
+role.timestamp = number
 role.sign_cnt = number
 role._check_k = schema_base.check_k
 role._check_kv = schema_base.check_kv

@@ -1,3 +1,5 @@
+local skynet = require "skynet"
+
 local M = {}
 
 function M.now()

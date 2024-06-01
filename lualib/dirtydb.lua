@@ -1,7 +1,9 @@
-local M = {}
-
 local dirtydoc = require("dirtydoc")
 local schema = require("schema")
+local util_table = require "util.table"
+local log = require "log"
+
+local M = {}
 
 local alldirty = {}
 function M.need_schema(flag)
@@ -18,6 +20,7 @@ local function save_obj(obj)
 	save_cb = alldirty[obj]
 	local dirty, result = dirtydoc.commit_mongo(obj)
 	if dirty then
+		log.debug("save_obj", obj, util_table.tostring(result))
 		save_cb(result)
 	end
 end
@@ -30,6 +33,7 @@ end
 -- 脏数据落地
 function M.save_dirty()
 	for obj, save_cb in pairs(alldirty) do
+		log.debug("save_dirty", obj, save_cb)
 		save_obj(obj)
 	end
 end

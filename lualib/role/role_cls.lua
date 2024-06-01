@@ -1,3 +1,5 @@
+local log = require "log"
+
 local M = {}
 
 local role_mt = { __index = M }

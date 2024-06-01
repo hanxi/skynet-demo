@@ -44,8 +44,7 @@ end
 local function _get_role_by_acc(acc)
     assert(acc)
     log.debug("get_role acc:", acc)
-    --return role_coll:findOne({acc=acc}, {_id = false})
-    return role_coll:findOne({acc=acc})
+    return role_coll:findOne({acc=acc}, {_id = false})
 end
 
 function M.load_role(acc)
@@ -60,13 +59,15 @@ end
 function M.load_role_by_uid(uid)
     assert(uid)
     log.debug("load_role_by_uid uid:", uid)
-    return role_coll:findOne({uid=uid})
+	return role_coll:findOne({uid=uid}, {_id = false})
 end
 
-function M.save_update(uid, update)
-    local ret = role_tbl:findAndModify({query = {uid = uid}, update = update}})
+function M.save_update(query, update)
+	log.debug("save_update. query:", util_table.tostring(query), ", update:", util_table.tostring(update))
+    local ret = role_coll:findAndModify({query = query, update = update})
 	local result = math.floor(ret.ok)
     if result ~= 1 then
+		log.error("save_update failed. uid:", query.uid, ", update:", util_table.tostring(update), ",ret:", util_table.tostring(ret))
         return false
     end
     return true
@@ -74,7 +75,7 @@ end
 
 function M.get_save_cb(uid)
 	return function(update)
-		M.save_update(uid, update)
+		M.save_update({uid=uid}, update)
 	end
 end
 
