@@ -362,6 +362,32 @@ end
 
 如果是给 skynet 服务使用，可以考虑开启 cluster 端口，这样其他节点就可以很方便的调用了。
 
+## 脏数据模块
+
+> https://github.com/hanxi/lua-dirty-mongo
+
+主要代码：
+
+- lualib/role/*.lua
+- lualib/dirtydb.lua
+- 3rd/lua-dirty-mongo
+- service/ws_agent.lua
+
+不过测试的 ws_agent 是一个连接一个 agent 服务，要做成多个连接共用一个 agent 才能发挥更好的效果。
+访问 http://localhost:8889/ 会有个测试协议的网页，可以发送 cs_login cs_sign cs_logout 。
+
+```json
+{"name": "cs_login", "data": {"acc": "hanxi"}}
+```
+
+```json
+{"name": "cs_sign", "data": {}}
+```
+
+```json
+{"name": "cs_logout", "data": {}}
+```
+
 ## QQ 群
 
 群号 677839887
