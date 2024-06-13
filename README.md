@@ -1,5 +1,10 @@
 # skynet-demo
 
+## 广告
+
+- [Skynet 游戏服务器开发实战](https://www.lanqiao.cn/courses/2770)  优惠邀请码: `2CZ2UA5u`
+- 爱发电: https://afdian.net/a/imhanxi
+
 ## 编译
 
 ```
