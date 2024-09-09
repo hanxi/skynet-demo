@@ -323,7 +323,7 @@ end
     skynet.error("ret2:", util_table.tostring(ret2))
 ```
 
-客户看出 test1 前快照表是空的， test1 后新增了 snapshot 相关变量以及 `t1`， test2 后新增了变量 `t2` :
+可以看出 test1 前快照表是空的， test1 后新增了 snapshot 相关变量以及 `t1`， test2 后新增了变量 `t2` :
 
 ```txt
 [:00000008] ret0: {}
