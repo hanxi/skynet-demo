@@ -6,5 +6,3 @@ return {
         ["data/test/data2.lua"] = true,
     },
 }
-
-

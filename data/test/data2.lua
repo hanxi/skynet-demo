@@ -10,5 +10,5 @@ return {
     [3] = {
         name = "skynet",
         code = 4,
-    }
+    },
 }

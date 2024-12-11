@@ -7,4 +7,3 @@ skynet.start(function()
         skynet.error("snowflake test:", id)
     end
 end)
-

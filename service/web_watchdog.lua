@@ -17,7 +17,7 @@ function CMD.start(conf)
     local balance = 1
     local id = socket.listen("0.0.0.0", port)
     skynet.error("Listen web port:", port)
-    socket.start(id , function(id, addr)
+    socket.start(id, function(id, addr)
         -- skynet.error(string.format("%s connected, pass it to agent :%08x", addr, agent[balance]))
         skynet.send(agent[balance], "lua", id)
         balance = balance + 1
@@ -33,5 +33,3 @@ skynet.start(function()
         skynet.ret(skynet.pack(f(subcmd, ...)))
     end)
 end)
-
-

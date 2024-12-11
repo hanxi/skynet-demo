@@ -38,13 +38,13 @@ function M.get_tbl(key)
 end
 
 function M.get_db_conf()
-    local ip = M.get("db_ip")
-    local port = M.get("db_port")
-    local dbuser = M.get("db_user")
-    local dbpwd = M.get("db_pwd")
-    local authdb = M.get("db_auth")
+    local ip = M.get "db_ip"
+    local port = M.get "db_port"
+    local dbuser = M.get "db_user"
+    local dbpwd = M.get "db_pwd"
+    local authdb = M.get "db_auth"
 
-    local cfg = { host = ip, port = port}
+    local cfg = { host = ip, port = port }
     if dbuser and dbpwd then
         cfg.username = dbuser
         cfg.password = dbpwd

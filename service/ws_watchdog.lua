@@ -10,7 +10,7 @@ local fd2gate = {}
 function SOCKET.open(fd, addr, gate)
     skynet.error("New client from : " .. addr)
     fd2gate[fd] = gate
-    agent[fd] = skynet.newservice("ws_agent")
+    agent[fd] = skynet.newservice "ws_agent"
     skynet.call(agent[fd], "lua", "start", {
         gate = gate,
         client = fd,
@@ -35,12 +35,12 @@ local function close_agent(fd)
 end
 
 function SOCKET.close(fd)
-    print("socket close",fd)
+    print("socket close", fd)
     close_agent(fd)
 end
 
 function SOCKET.error(fd, msg)
-    print("socket error",fd, msg)
+    print("socket error", fd, msg)
     close_agent(fd)
 end
 
@@ -55,7 +55,7 @@ end
 
 function CMD.start(conf)
     protocol = conf.protocol
-    skynet.call(master_gate, "lua", "open" , conf)
+    skynet.call(master_gate, "lua", "open", conf)
 end
 
 function CMD.close(fd)
@@ -74,6 +74,5 @@ skynet.start(function()
         end
     end)
 
-    master_gate = skynet.newservice("ws_gate")
+    master_gate = skynet.newservice "ws_gate"
 end)
-

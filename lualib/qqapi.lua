@@ -1,6 +1,6 @@
+local config = require "config"
 local httpc = require "http.httpc"
 local json = require "json"
-local config = require "config"
 local log = require "log"
 local skynet = require "skynet"
 
@@ -17,8 +17,12 @@ function M.refresh_access_token()
     end
 
     local host = "https://api.q.qq.com"
-    local url = string.format("/api/getToken?grant_type=client_credential&appid=%s&secret=%s", config.get("qq_appid"), config.get("qq_secret"))
-    local status,ret = httpc.request("GET", host, url, {})
+    local url = string.format(
+        "/api/getToken?grant_type=client_credential&appid=%s&secret=%s",
+        config.get "qq_appid",
+        config.get "qq_secret"
+    )
+    local status, ret = httpc.request("GET", host, url, {})
     log.info("refresh_access_token. url:", url, ",ret:", ret)
     if status == 200 then
         ret = json.decode(ret)
@@ -33,15 +37,15 @@ end
 function M.check_msg(msg)
     M.refresh_access_token()
     local host = "https://api.q.qq.com"
-	local header = {
-		["content-type"] = "application/json"
-	}
+    local header = {
+        ["content-type"] = "application/json",
+    }
     local url = string.format("/api/json/security/MsgSecCheck?access_token=%s", access_token)
     local data = {
         appid = appid,
         content = msg,
     }
-	local status,ret = httpc.request("POST", host, url, {}, header, json.encode(data))
+    local status, ret = httpc.request("POST", host, url, {}, header, json.encode(data))
     log.debug("check_msg. msg:", msg, ", status:", status, ", url:", url, ", ret:", ret)
 
     if status ~= 200 then

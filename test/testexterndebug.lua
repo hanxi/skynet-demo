@@ -1,5 +1,5 @@
-local skynet = require "skynet"
 local service = require "skynet.service"
+local skynet = require "skynet"
 local util_table = require "util.table"
 
 local function test_service()
@@ -13,16 +13,16 @@ local function test_service()
             b = 2,
         }
         t.t1 = t1
-        skynet.error("in test1")
+        skynet.error "in test1"
     end
     function CMD.test2()
         local t2 = {
             c = 3,
         }
         t.t2 = t2
-        skynet.error("in test2")
+        skynet.error "in test2"
     end
-    skynet.dispatch("lua", function(_,source,cmd,...)
+    skynet.dispatch("lua", function(_, source, cmd, ...)
         local f = CMD[cmd]
         if f then
             skynet.ret(skynet.pack(f(...)))
@@ -33,7 +33,7 @@ local function test_service()
 end
 
 skynet.start(function()
-    skynet.newservice("debug_console",8000)
+    skynet.newservice("debug_console", 8000)
     local address = service.new("test", test_service)
     local source = [[
         local extern_debug = require "extern_debug"
@@ -56,4 +56,3 @@ skynet.start(function()
     local ret2 = skynet.call(address, "debug", "SNAPSHOT")
     skynet.error("ret2:", util_table.tostring(ret2))
 end)
-

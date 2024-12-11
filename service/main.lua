@@ -1,5 +1,5 @@
-local skynet = require "skynet"
 local service = require "skynet.service"
+local skynet = require "skynet"
 
 local max_client = 64
 
@@ -15,7 +15,7 @@ local function simple_echo_client_service(protocol)
         local resp, close_reason = websocket.read(ws_id)
         print("<: " .. (resp and resp or "[Close] " .. close_reason))
         if not resp then
-            print("echo server close.")
+            print "echo server close."
             break
         end
         websocket.ping(ws_id)
@@ -25,13 +25,13 @@ end
 
 local debug_console_inject = require "debug_console_inject"
 skynet.start(function()
-    skynet.error("Server start")
+    skynet.error "Server start"
     if not skynet.getenv "daemon" then
-        skynet.newservice("console")
+        skynet.newservice "console"
     end
-    local address = skynet.newservice("debug_console",8000)
+    local address = skynet.newservice("debug_console", 8000)
     debug_console_inject(address)
-    local ws_watchdog = skynet.newservice("ws_watchdog")
+    local ws_watchdog = skynet.newservice "ws_watchdog"
     local protocol = "ws"
     local ws_port = 8888
     skynet.call(ws_watchdog, "lua", "start", {
@@ -42,7 +42,7 @@ skynet.start(function()
     })
     skynet.error("websocket watchdog listen on", ws_port)
 
-    local web_watchdog = skynet.newservice("web_watchdog")
+    local web_watchdog = skynet.newservice "web_watchdog"
     local web_port = 8889
     skynet.call(web_watchdog, "lua", "start", {
         port = web_port,

@@ -66,4 +66,3 @@ local skynet = require "skynet"
 return function(address)
     skynet.call(address, "debug", "RUN", source)
 end
-

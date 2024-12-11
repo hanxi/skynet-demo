@@ -1,25 +1,29 @@
+local httpd = require "http.httpd"
 local skynet = require "skynet"
 local socket = require "skynet.socket"
-local httpd = require "http.httpd"
 local sockethelper = require "http.sockethelper"
 local urllib = require "http.url"
 
+local router = require "router"
 local web_router = require "web_router"
-local router = require 'router'
 
 local r = router.new()
 web_router(r)
 -- 通用的
 r:match({
     GET = {
-        ["/hello"]       = function(params) return "someone said hello" end,
-        ["/hello/:name"] = function(params) return "hello, " .. params.name end
+        ["/hello"] = function(params)
+            return "someone said hello"
+        end,
+        ["/hello/:name"] = function(params)
+            return "hello, " .. params.name
+        end,
     },
     POST = {
         ["/app/:id/comments"] = function(params)
             return "comment " .. params.comment .. " created on app " .. params.id
-        end
-    }
+        end,
+    },
 })
 
 local protocol = ...
@@ -43,7 +47,7 @@ local function handle_request(id, url, method, header, body, interface)
         query = {}
     end
 
-    local ok, msg, code = r:execute(method, path, query, {header = header, body = body})
+    local ok, msg, code = r:execute(method, path, query, { header = header, body = body })
     if ok then
         skynet.error(msg, code)
         response(id, interface.write, code or 200, msg)
@@ -67,8 +71,8 @@ local function gen_interface(protocol, fd)
             SSLCTX_SERVER = tls.newctx()
             -- gen cert and key
             -- openssl req -x509 -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem -out server-cert.pem
-            local certfile = skynet.getenv("certfile") or "./server-cert.pem"
-            local keyfile = skynet.getenv("keyfile") or "./server-key.pem"
+            local certfile = skynet.getenv "certfile" or "./server-cert.pem"
+            local keyfile = skynet.getenv "keyfile" or "./server-key.pem"
             print(certfile, keyfile)
             SSLCTX_SERVER:set_cert(certfile, keyfile)
         end
@@ -92,7 +96,7 @@ local function close(id, interface)
 end
 
 skynet.start(function()
-    skynet.dispatch("lua", function (_,_,id)
+    skynet.dispatch("lua", function(_, _, id)
         socket.start(id)
         skynet.error("start id:", id)
         local interface = gen_interface(protocol, id)
@@ -104,7 +108,7 @@ skynet.start(function()
         skynet.error(url)
         if not code then
             if url == sockethelper.socket_error then
-                skynet.error("socket closed")
+                skynet.error "socket closed"
             else
                 skynet.error(url)
             end
@@ -122,4 +126,3 @@ skynet.start(function()
         close(id, interface)
     end)
 end)
-

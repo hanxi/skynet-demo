@@ -1,9 +1,9 @@
 local config = require "config"
+local json = require "json"
 local log = require "log"
 local mongo = require "skynet.db.mongo"
-local util_table = require "util.table"
-local json = require "json"
 local snowflake = require "snowflake"
+local util_table = require "util.table"
 
 local M = {}
 
@@ -13,24 +13,24 @@ local test_tbl
 
 -- 确保数组可以正常转为 bson
 local bson_array_mt = {
-    __len = function (a)
+    __len = function(a)
         return rawlen(a)
     end,
 }
 
-M.init_db = function ()
+M.init_db = function()
     local cfg = config.get_db_conf()
     local dbs = mongo.client(cfg)
 
-    local db_name = config.get("db_name")
+    local db_name = config.get "db_name"
     log.info("connect to db:", db_name)
     db = dbs[db_name]
 
     user_tbl = db.user
 
-    user_tbl:createIndex({{uid = 1}, unique = true})
-    user_tbl:createIndex({{acc = 1}, unique = true})
-    user_tbl:createIndex({{location = "2d"}})
+    user_tbl:createIndex({ { uid = 1 }, unique = true })
+    user_tbl:createIndex({ { acc = 1 }, unique = true })
+    user_tbl:createIndex({ { location = "2d" } })
 
     test_tbl = db.test
 end
@@ -48,11 +48,11 @@ local function call_create_new_user(query)
     }
     util_table.merge(user_data, query)
     local ok, msg, ret = user_tbl:safe_insert(user_data)
-    if (ok and ret and ret.n == 1) then
+    if ok and ret and ret.n == 1 then
         log.info("new uid succ. uid:", uid, ",ret:", util_table.tostring(ret))
         return uid, user_data
     else
-        return 0, "new user error:"..msg
+        return 0, "new user error:" .. msg
     end
 end
 
@@ -63,7 +63,7 @@ local function _call_load_user(query)
     end
 
     if not ret.uid then
-        return 0, "cannot load user. query:"..util_table.tostring(query)
+        return 0, "cannot load user. query:" .. util_table.tostring(query)
     end
     return ret.uid, ret
 end
@@ -79,9 +79,9 @@ end
 
 -- 设置位置
 function M.set_location(uid, longitude, latitude)
-    local location = {longitude, latitude}
+    local location = { longitude, latitude }
     setmetatable(location, bson_array_mt)
-    local ret = user_tbl:findAndModify({query = {uid = uid}, update = {["$set"] = {location = location}}})
+    local ret = user_tbl:findAndModify({ query = { uid = uid }, update = { ["$set"] = { location = location } } })
     local result = math.floor(ret.ok)
     if result ~= 1 then
         return false
@@ -97,7 +97,7 @@ function M.get_near_player(longitude, latitude, limit)
                 near = setmetatable({ longitude, latitude }, bson_array_mt),
                 distanceField = "location",
                 maxDistance = 2000,
-                query = {location = {["$exists"] = true}},
+                query = { location = { ["$exists"] = true } },
             },
         },
         {

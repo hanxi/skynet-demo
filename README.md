@@ -7,7 +7,7 @@
 ## 编译
 
 ```
-sudo apt-get install -y autoconf libssl-dev
+sudo apt-get install -y autoconf libssl-dev zlib1g-dev
 git submodule update --init --recursive
 make build
 ```

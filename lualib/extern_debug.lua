@@ -15,7 +15,7 @@ function dbgcmd.SNAPSHOT()
         return skynet.ret(skynet.pack({}))
     end
     local diff = {}
-    for k,v in pairs(new_snapshot) do
+    for k, v in pairs(new_snapshot) do
         if not old_snapshot[k] then
             diff[k] = v
         end
@@ -26,7 +26,7 @@ function dbgcmd.SNAPSHOT()
 end
 
 function M.init()
-    for k,v in pairs(dbgcmd) do
+    for k, v in pairs(dbgcmd) do
         skynet_debug.reg_debugcmd(k, v)
     end
 end

@@ -1,6 +1,6 @@
 -- Auto generate from proto/db.proto
 
-local schema_base = require("schema_base")
+local schema_base = require "schema_base"
 local number = schema_base.number
 local string = schema_base.string
 local boolean = schema_base.boolean

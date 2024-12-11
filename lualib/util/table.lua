@@ -5,7 +5,7 @@ function M.deepcopy(orig, copies)
     copies = copies or {}
     local orig_type = type(orig)
     local copy
-    if orig_type == 'table' then
+    if orig_type == "table" then
         if copies[orig] then
             copy = copies[orig]
         else
@@ -24,7 +24,7 @@ end
 function M.keys(data)
     local copy = {}
     local idx = 1
-    for k,_ in pairs(data) do
+    for k, _ in pairs(data) do
         copy[idx] = k
         idx = idx + 1
         --table.insert(copy, k)
@@ -33,7 +33,7 @@ function M.keys(data)
 end
 
 function M.size(data)
-    if type(data) ~= 'table' then
+    if type(data) ~= "table" then
         return 0
     end
     local cnt = 0
@@ -47,7 +47,7 @@ end
 function M.values(data)
     local copy = {}
     local idx = 1
-    for _,v in pairs(data) do
+    for _, v in pairs(data) do
         copy[idx] = v
         idx = idx + 1
     end
@@ -55,13 +55,13 @@ function M.values(data)
 end
 
 function M.clear(t)
-    for k,_ in pairs(t) do
+    for k, _ in pairs(t) do
         t[k] = nil
     end
 end
 
 function M.merge(t1, t2)
-    for k,v in pairs(t2) do
+    for k, v in pairs(t2) do
         t1[k] = v
     end
 end
@@ -73,8 +73,8 @@ end
 local gsub = string.gsub
 local match = string.match
 local function append_result(result, ...)
-    local n = select('#', ...)
-    for i=1,n  do
+    local n = select("#", ...)
+    for i = 1, n do
         result.i = result.i + 1
         result[result.i] = select(i, ...)
     end
@@ -113,13 +113,13 @@ local function key_to_str(k, result)
     end
 end
 
-local MAX_STR_TBL_CNT = 1024*1024 -- result has 1M element
-M.tostring_tbl = function (tbl, result)
+local MAX_STR_TBL_CNT = 1024 * 1024 -- result has 1M element
+M.tostring_tbl = function(tbl, result)
     if not result.i then
         result.i = 0
     end
     append_result(result, "{")
-    for k,v in pairs(tbl) do
+    for k, v in pairs(tbl) do
         if result.i > MAX_STR_TBL_CNT then
             break
         end
@@ -131,7 +131,7 @@ M.tostring_tbl = function (tbl, result)
     append_result(result, "}")
 end
 
-M.concat_tostring_tbl = function (result)
+M.concat_tostring_tbl = function(result)
     result.i = nil
     return table.concat(result, "")
 end
@@ -143,8 +143,8 @@ M.tostring = function(tbl)
     return M.concat_tostring_tbl(result)
 end
 
-M.in_array = function (tbl, check_value)
-    for k,v in pairs(tbl) do
+M.in_array = function(tbl, check_value)
+    for k, v in pairs(tbl) do
         if v == check_value then
             return k
         end

@@ -15,17 +15,17 @@ end
 
 function M.snowflake()
     local addr = get_snowflake_addr()
-	return skynet.call(addr, "lua", "snowflake")
+    return skynet.call(addr, "lua", "snowflake")
 end
 
 skynet.init(function()
     -- 初始化 snowflake master 服务
-	skynet.uniqueservice("snowflake")
+    skynet.uniqueservice "snowflake"
 
     -- 初始化 snowflake 服务地址列表
     service_list = {}
-    local id_begin = tonumber(skynet.getenv("snowflake_begin")) or 1
-    local id_end = tonumber(skynet.getenv("snowflake_end")) or 10
+    local id_begin = tonumber(skynet.getenv "snowflake_begin") or 1
+    local id_end = tonumber(skynet.getenv "snowflake_end") or 10
     assert(id_begin <= id_end, "snowflake_begin or snowflake_end error")
 
     local i = 0

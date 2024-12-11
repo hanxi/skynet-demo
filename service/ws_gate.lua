@@ -1,12 +1,12 @@
 local skynet = require "skynet"
 require "skynet.manager"
 local socket = require "skynet.socket"
-local websocket = require "http.websocket"
 local socketdriver = require "skynet.socketdriver"
+local websocket = require "http.websocket"
 
 local watchdog
-local connection = {}   -- fd -> connection : { fd , client, agent , ip, mode }
-local forwarding = {}   -- agent -> connection
+local connection = {} -- fd -> connection : { fd , client, agent , ip, mode }
+local forwarding = {} -- agent -> connection
 
 local client_number = 0
 local maxclient -- max client
@@ -16,10 +16,10 @@ local protocol
 local master_name, slave_name = ...
 master_name = master_name or ".ws_gate"
 
-skynet.register_protocol {
+skynet.register_protocol({
     name = "client",
     id = skynet.PTYPE_CLIENT,
-}
+})
 
 local function launch_master()
     local CMD_MASTER = {}
@@ -30,13 +30,13 @@ local function launch_master()
         assert(instance > 0)
         local balance = 1
 
-        for i=1,instance do
+        for i = 1, instance do
             local _slave_name = string.format("%s-slave-%d", master_name, i)
             table.insert(slave, skynet.newservice(SERVICE_NAME, master_name, _slave_name))
         end
 
         conf.watchdog = conf.watchdog or source
-        for i=1,instance do
+        for i = 1, instance do
             local s = slave[i]
             skynet.call(s, "lua", "open", conf)
         end
@@ -65,8 +65,8 @@ local function launch_master()
     skynet.dispatch("lua", function(session, source, cmd, ...)
         local f = CMD_MASTER[cmd]
         if not f then
-            skynet.error("ws gate master can't dispatch cmd ".. (cmd or nil))
-            skynet.ret(skynet.pack({ok=false}))
+            skynet.error("ws gate master can't dispatch cmd " .. (cmd or nil))
+            skynet.ret(skynet.pack({ ok = false }))
             return
         end
         if session == 0 then
@@ -78,7 +78,6 @@ local function launch_master()
 end
 
 local function launch_slave()
-
     local function unforward(c)
         if c.agent then
             forwarding[c.agent] = nil
@@ -122,15 +121,15 @@ local function launch_slave()
     function handler.handshake(fd, header, url)
         local addr = websocket.addrinfo(fd)
         skynet.error("ws handshake from: " .. tostring(fd), "url", url, "addr:", addr)
-        skynet.error("----header-----")
-        for k,v in pairs(header) do
-            skynet.error(k,v)
+        skynet.error "----header-----"
+        for k, v in pairs(header) do
+            skynet.error(k, v)
         end
-        skynet.error("--------------")
+        skynet.error "--------------"
     end
 
     function handler.message(fd, msg)
-        skynet.error("ws ping from: " .. tostring(fd), msg.."\n")
+        skynet.error("ws ping from: " .. tostring(fd), msg .. "\n")
         -- recv a package, forward it
         local c = connection[fd]
         local agent = c and c.agent
@@ -176,7 +175,7 @@ local function launch_slave()
     end
 
     function CMD_SLAVE.response(source, fd, msg)
-        skynet.error("ws response: " .. tostring(fd), msg.."\n")
+        skynet.error("ws response: " .. tostring(fd), msg .. "\n")
         -- forward msg
         websocket.write(fd, msg)
     end
@@ -200,8 +199,8 @@ local function launch_slave()
     skynet.dispatch("lua", function(session, source, cmd, ...)
         local f = CMD_SLAVE[cmd]
         if not f then
-            skynet.error("ws gate slave can't dispatch cmd ".. (cmd or nil))
-            skynet.ret(skynet.pack({ok=false}))
+            skynet.error("ws gate slave can't dispatch cmd " .. (cmd or nil))
+            skynet.ret(skynet.pack({ ok = false }))
             return
         end
         if session == 0 then
@@ -223,4 +222,3 @@ skynet.start(function()
         launch_master()
     end
 end)
-

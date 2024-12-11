@@ -1,15 +1,14 @@
-local skynet = require "skynet"
 local agora = require "agora"
+local skynet = require "skynet"
 local tencentyun = require "tencentyun"
 
 skynet.start(function()
-
     -- 腾讯IM配置
     local im_sdkappid = 1400427955
     local im_key = "4e1876a738a586914ba9302ef8460bad24c898533c6f558e31cade0f60ec08c4"
-    local im_expire = 180*86400
+    local im_expire = 180 * 86400
     local uid = "123456"
-    local ok,imsig,errmsg = tencentyun.gen_sig(im_sdkappid, uid, im_key, im_expire)
+    local ok, imsig, errmsg = tencentyun.gen_sig(im_sdkappid, uid, im_key, im_expire)
     if not ok then
         skynet.error("imsig failed. uid:", uid, ",errmsg:", errmsg)
     end
