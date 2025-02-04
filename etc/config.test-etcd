@@ -1,0 +1,12 @@
+include "config.path"
+
+-- 启动配置
+bootstrap = "snlua bootstrap"   -- The service for bootstrap
+start = "test/test-etcd"  -- main script
+
+harbor = 0
+
+etcd_hosts = "http://127.0.0.1:2379,http://127.0.0.1:2380,http://127.0.0.1:2381"
+etcd_user = "root"
+etcd_password = "123456"
+etcd_base_path = "/config/dev/"

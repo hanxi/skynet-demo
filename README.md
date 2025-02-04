@@ -2,7 +2,7 @@
 
 ## 广告
 
-- 爱发电: https://afdian.net/a/imhanxi
+- 爱发电: <https://afdian.net/a/imhanxi>
 
 ## 编译
 
@@ -14,7 +14,7 @@ make build
 
 ## websocket watchdog gate agent
 
-fork from https://github.com/xzhovo/skynet-websocket-gate
+fork from <https://github.com/xzhovo/skynet-websocket-gate>
 
 编译 skynet:
 
@@ -49,7 +49,6 @@ make linux TLS_MODULE=tls
 local protocol = "wss"
 ```
 
-
 方案跟 [xzhovo/skynet-websocket-gate](https://github.com/xzhovo/skynet-websocket-gate) 有点不同，为了支持 `wss`, 采用了转发的模式推送数据给客户端
 
 往 `gate` 发送 `response` 数据后， `gate` 会转发给客户端。
@@ -59,7 +58,6 @@ skynet.send(gate, "lua", "response", fd, msg)
 ```
 
 [xzhovo/skynet-websocket-gate](https://github.com/xzhovo/skynet-websocket-gate) 的方案有个隐患， `agent` 引用了 `websocket.lua`, 需要维护好 `ws_pool` 。
-
 
 根据 [mikewu86](https://github.com/mikewu86) 的提议 [issues#1](https://github.com/hanxi/skynet-demo/issues/1) ，已经将 ws_gate 扩展为 master/slave 模式。
 
@@ -76,7 +74,6 @@ skynet.send(gate, "lua", "response", fd, msg)
 ## 集成 zset 模块
 
 `lualib/zset.lua`
-
 
 ## 集成声网 SDK
 
@@ -213,7 +210,7 @@ end
 ./skynet/skynet etc/config.cfg
 ```
 
-连接 debug console: 
+连接 debug console:
 
 ```txt
 rlwrap nc 127.0.0.1 8000
@@ -241,7 +238,7 @@ stat
 
 示例中修改了 stat 命令，拼接了原有 stat 命令和 mem 命令的内容。
 
-缘起： https://github.com/cloudwu/skynet/issues/1262
+缘起： <https://github.com/cloudwu/skynet/issues/1262>
 
 **这个方法只建议在新增命令时使用，原有命令组合能实现的还是写另外的客户端脚本执行 http 接口来组合来实现。**
 
@@ -334,11 +331,12 @@ end
 ```
 
 运行测试
+
 ```bash
 ./skynet/skynet etc/config.testexterndebug
 ```
 
-缘起： https://github.com/cloudwu/skynet/pull/848
+缘起： <https://github.com/cloudwu/skynet/pull/848>
 
 ## 服务退出管理
 
@@ -346,9 +344,9 @@ end
 
 - `atexit(func)` 接口用于注册服务退出时执行的函数，类似 C 语言的 atexit 接口，先注册的函数后执行
 - `exit(waittime, timeout1, timeout2)` 接口用于退出服务
-   - waittime 等待退出时间（单位秒） 默认 0 秒
-   - timeout1 执行 atexit 的超时时间（单位秒） 默认 5 秒
-   - timeout2 执行 skynet.exit 的超时时间（单位秒） 默认 5 秒
+  - waittime 等待退出时间（单位秒） 默认 0 秒
+  - timeout1 执行 atexit 的超时时间（单位秒） 默认 5 秒
+  - timeout2 执行 skynet.exit 的超时时间（单位秒） 默认 5 秒
 
 ### 测试
 
@@ -368,7 +366,7 @@ end
 
 ## 脏数据模块
 
-> https://github.com/hanxi/lua-dirty-mongo
+> <https://github.com/hanxi/lua-dirty-mongo>
 
 主要代码：
 
@@ -378,7 +376,7 @@ end
 - service/ws_agent.lua
 
 不过测试的 ws_agent 是一个连接一个 agent 服务，要做成多个连接共用一个 agent 才能发挥更好的效果。
-访问 http://localhost:8889/ 会有个测试协议的网页，可以发送 cs_login cs_sign cs_logout 。
+访问 <http://localhost:8889/> 会有个测试协议的网页，可以发送 cs_login cs_sign cs_logout 。
 
 ```json
 {"name": "cs_login", "data": {"acc": "hanxi"}}
@@ -390,6 +388,85 @@ end
 
 ```json
 {"name": "cs_logout", "data": {}}
+```
+
+## etcd 模块
+
+- [x] 操作接口实现. 基于 <https://github.com/JieTrancender/skynet-etcd> 修改
+- [ ] skynet cluster 服务发现
+
+### etcd 服务配置示例
+
+采用 docker compose 启动， docker-compose.yml 文件如下：
+
+```yml
+networks:
+  etcd-net:
+    driver: bridge
+
+x-common-settings: &common-settings
+  image: bitnami/etcd:latest
+  restart: always
+  user: "1000:1000"
+  networks:
+    - etcd-net
+
+x-common-environment: &common-environment
+  ALLOW_NONE_AUTHENTICATION: no
+  ETCD_INITIAL_CLUSTER_TOKEN: my-etcd-cluster-token
+  ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+  ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+  ETCD_INITIAL_CLUSTER=etcd1: http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+  ETCD_INITIAL_CLUSTER_STATE: new
+  ETCD_ROOT_PASSWORD: 123456
+
+services:
+  etcd1:
+    <<: *common-settings
+    container_name: etcd1
+    ports:
+      - "2379:2379"
+    environment:
+      <<: *common-environment
+      ETCD_NAME: etcd1
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd1:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd1:2379
+    volumes:
+      - ./etcd1_data:/bitnami/etcd/data
+
+  etcd2:
+    <<: *common-settings
+    container_name: etcd2
+    ports:
+      - "2378:2379"
+    environment:
+      <<: *common-environment
+      ETCD_NAME: etcd2
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd2:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd2:2379
+    volumes:
+      - ./etcd2_data:/bitnami/etcd/data
+
+  etcd3:
+    <<: *common-settings
+    container_name: etcd3
+    ports:
+      - "2377:2379"
+    environment:
+      <<: *common-environment
+      ETCD_NAME: etcd3
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd3:2380
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd3:2379
+    volumes:
+      - ./etcd3_data:/bitnami/etcd/data
+```
+
+### 测试
+
+启动:
+
+```bash
+./skynet/skynet etc/config.test-etcd
 ```
 
 ## QQ 群
