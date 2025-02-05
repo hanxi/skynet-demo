@@ -29,6 +29,7 @@ local URL_REVOKE = API_PREFIX .. "/kv/lease/revoke"
 local URL_KEEPALIVE = API_PREFIX .. "/lease/keepalive"
 local URL_TIMETOLIVE = API_PREFIX .. "/kv/lease/timetolive"
 local URL_LEASES = API_PREFIX .. "/lease/leases"
+local URL_WATCH = API_PREFIX .. "/watch"
 
 local _M = {}
 local mt = { __index = _M }
@@ -79,9 +80,7 @@ end
 -- define local refresh function variable
 local refresh_jwt_token
 
-local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
-    log_info("v3 request uri: ", uri, ", timeout: ", timeout)
-
+local function _request_pre(self, uri, opts, timeout, ignore_auth)
     local body
     if opts and opts.body and table_exist_keys(opts.body) then
         body = encode_json(opts.body)
@@ -91,7 +90,6 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
         uri = uri .. "?" .. encode_args(opts.query)
     end
 
-    local recvheader = {}
     local headers = {}
     local keepalive = true
     if self.is_auth then
@@ -107,8 +105,20 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
             keepalive = false -- jwt_token not keepalive
         end
     end
+    -- TODO: keepalive not support in skynet
+    return { uri = uri, headers = headers, body = body, keepalive = keepalive }
+end
 
-    local status, body = httpc.request(method, host, uri, recvheader, headers, body)
+local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
+    log_info("_request_uri uri: ", uri, ", timeout: ", timeout)
+
+    local ret, err = _request_pre(self, uri, opts, timeout, ignore_auth)
+    if err then
+        return nil, err
+    end
+
+    local recvheader = {}
+    local status, body = httpc.request(method, host, ret.uri, recvheader, ret.headers, ret.body)
     if status >= 500 then
         return nil, "invalid response code: " .. status
     end
@@ -124,13 +134,24 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
     return { status = status, headers = recvheader, body = decode_json(body) }
 end
 
-local function choose_endpoint(self)
-    if self.is_cluster then
-        return self.endpoints[1]
+local function _request_uri_stream(self, host, method, uri, opts, timeout, ignore_auth)
+    log_info("_request_uri_stream uri: ", uri, ", timeout: ", timeout)
+
+    local ret, err = _request_pre(self, uri, opts, timeout, ignore_auth)
+    if err then
+        return nil, err
     end
 
+    local recvheader = {}
+
+    return httpc.request_stream(method, host, ret.uri, recvheader, ret.headers, ret.body)
+end
+
+local function ring_balancer(self)
+    local endpoints = self.endpoints
     local endpoints_len = #endpoints
-    self.init_count = (self.init_count or 0) + 1
+
+    self.init_count = (self.init_count or random(100)) + 1
     local pos = self.init_count % endpoints_len + 1
     if self.init_count >= INIT_COUNT_RESIZE then
         self.init_count = 0
@@ -139,13 +160,78 @@ local function choose_endpoint(self)
     return endpoints[pos]
 end
 
+local fail_timeout = 10 -- 10 sec
+local fail_expired_time = {} -- map[http_host]time
+
+local function health_check(http_host)
+    if type(http_host) ~= "string" then
+        return false, "etcd http_host invalid"
+    end
+    local host_fail_expired_time = fail_expired_time[http_host]
+    if host_fail_expired_time and host_fail_expired_time >= now() then
+        return false, "http_host: " .. http_host .. " is unhealthy"
+    end
+    return true
+end
+
+local function report_failure(http_host)
+    log_info("report_failure", http_host)
+    fail_expired_time[http_host] = now() + fail_timeout
+end
+
+local function choose_endpoint(self)
+    if not self.is_cluster then
+        return self.endpoints[1]
+    end
+
+    for _ = 1, #self.endpoints do
+        local endpoint = ring_balancer(self)
+        if health_check(endpoint.http_host) then
+            return endpoint
+        end
+    end
+
+    return self.endpoints[1]
+end
+
 local function _post(self, uri, body, timeout, ignore_auth)
-    local endpoint
-    endpoint, err = choose_endpoint(self)
+    local endpoint, err = choose_endpoint(self)
     if not endpoint then
         return nil, err
     end
-    return _request_uri(self, endpoint.http_host, "POST", uri, { body = body }, timeout, ignore_auth)
+
+    local ok, err = xpcall(
+        _request_uri,
+        debug.traceback,
+        self,
+        endpoint.http_host,
+        "POST",
+        uri,
+        { body = body },
+        timeout,
+        ignore_auth
+    )
+    if not ok then
+        report_failure(endpoint.http_host)
+        log_info("_post failed.", err)
+        return nil, err
+    else
+        return err
+    end
+end
+
+local function _post_stream(self, uri, body, timeout)
+    local endpoint, err = choose_endpoint(self)
+    if not endpoint then
+        return nil, err
+    end
+    local ok, err =
+        xpcall(_request_uri_stream, debug.traceback, self, endpoint.http_host, "POST", uri, { body = body }, timeout)
+    if not ok then
+        report_failure(endpoint.http_host)
+        return nil, err
+    end
+    return { stream = err, endpoint = endpoint }
 end
 
 local function serialize_and_encode_base64(data)
@@ -235,8 +321,7 @@ function refresh_jwt_token(self, timeout)
         password = self.password,
     }
 
-    local res
-    res, err = _post(self, URL_AUTHENTICATE, body, timeout, true)
+    local res, err = _post(self, URL_AUTHENTICATE, body, timeout, true)
     self.requesting_token = false
 
     if err then
@@ -718,5 +803,131 @@ do
         return delete(self, key, attr)
     end
 end -- do
+
+local watch_mt = {
+    __call = function(self)
+        local stream = self.stream
+
+        local resp = stream()
+        if stream.status ~= 200 then
+            log_info("watch response:", resp)
+            return nil, stream.status
+        end
+
+        local body = decode_json(resp)
+        if not body then
+            log_info("decode json failed:", resp)
+            report_failure(self.endpoint.http_host)
+            return nil, "decode json failed"
+        end
+
+        if body.error then
+            log_info("watch return err:", body.error)
+            return nil, body.error, stream
+        end
+
+        local events = body.result and body.result.events
+
+        if not events then
+            return body, nil, stream
+        end
+
+        for _, ev in ipairs(events) do
+            ev.kv.value = ev.kv.value and decode_base64(ev.kv.value) -- DELETE not have value
+            ev.kv.key = decode_base64(ev.kv.key)
+            ev.type = ev.type or "PUT"
+
+            if ev.prev_kv then
+                ev.prev_kv.value = ev.prev_kv.value and decode_base64(ev.prev_kv.value)
+                ev.prev_kv.key = decode_base64(ev.prev_kv.key)
+            end
+        end
+
+        return body, nil, stream
+    end,
+    __close = function(self)
+        self.stream:close()
+    end,
+}
+
+local function watch(self, key, attr)
+    if type(key) ~= "string" then
+        return nil, "key must be string"
+    end
+
+    if #key == 0 then
+        key = str_char(0)
+    end
+
+    key = encode_base64(key)
+
+    local range_end
+    if attr.range_end then
+        range_end = encode_base64(attr.range_end)
+    end
+
+    local prev_kv
+    if attr.prev_kv then
+        prev_kv = attr.prev_kv and true or false
+    end
+
+    local start_revision
+    if attr.start_revision then
+        start_revision = attr.start_revision and attr.start_revision or 0
+    end
+
+    local watch_id
+    if attr.watch_id then
+        watch_id = attr.watch_id and attr.watch_id or 0
+    end
+
+    local progress_notify
+    if attr.progress_notify then
+        progress_notify = attr.progress_notify and true or false
+    end
+
+    local fragment
+    if attr.fragment then
+        fragment = attr.fragment and true or false
+    end
+
+    local filters
+    if attr.filters then
+        filters = attr.filters and attr.filters or 0
+    end
+
+    local need_cancel
+    if attr.need_cancel then
+        need_cancel = attr.need_cancel and true or false
+    end
+
+    local body = {
+        create_request = {
+            key = key,
+            range_end = range_end,
+            prev_kv = prev_kv,
+            start_revision = start_revision,
+            watch_id = watch_id,
+            progress_notify = progress_notify,
+            fragment = fragment,
+            filters = filters,
+        },
+    }
+
+    local watch_stream, err = _post_stream(self, URL_WATCH, body, attr and attr.timeout or self.timeout)
+    return setmetatable(watch_stream, watch_mt)
+end
+
+function _M.watch(self, key, opts)
+    opts = opts or {}
+    opts.range_end = nil
+    return watch(self, key, opts)
+end
+
+function _M.watchdir(self, key, opts)
+    opts = opts or {}
+    opts.range_end = get_range_end(key)
+    return watch(self, key, opts)
+end
 
 return _M

@@ -416,7 +416,7 @@ x-common-environment: &common-environment
   ETCD_INITIAL_CLUSTER_TOKEN: my-etcd-cluster-token
   ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
   ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
-  ETCD_INITIAL_CLUSTER=etcd1: http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+  ETCD_INITIAL_CLUSTER: etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
   ETCD_INITIAL_CLUSTER_STATE: new
   ETCD_ROOT_PASSWORD: 123456
 
@@ -467,6 +467,13 @@ services:
 
 ```bash
 ./skynet/skynet etc/config.test-etcd
+```
+
+测试 watch:
+
+```shell
+docker compose exec etcd1 etcdctl --user root --password 123456 put hello 1
+docker compose exec etcd1 etcdctl --user root --password 123456 put /foo/hanxi 1
 ```
 
 ## QQ 群

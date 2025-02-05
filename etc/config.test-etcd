@@ -6,7 +6,7 @@ start = "test/test-etcd"  -- main script
 
 harbor = 0
 
-etcd_hosts = "http://127.0.0.1:2379,http://127.0.0.1:2380,http://127.0.0.1:2381"
+etcd_hosts = "http://127.0.0.1:2379,http://127.0.0.1:2378,http://127.0.0.1:2377"
 etcd_user = "root"
 etcd_password = "123456"
 etcd_base_path = "/config/dev/"
