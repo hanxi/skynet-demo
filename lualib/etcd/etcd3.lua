@@ -915,6 +915,9 @@ local function watch(self, key, attr)
     }
 
     local watch_stream, err = _post_stream(self, URL_WATCH, body, attr and attr.timeout or self.timeout)
+	if err then
+		return nil, err
+	end
     return setmetatable(watch_stream, watch_mt)
 end
 

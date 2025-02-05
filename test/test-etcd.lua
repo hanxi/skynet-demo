@@ -199,16 +199,23 @@ local function testwatchone(etcd_cli)
     end
 end
 
+-- FIXME: 断线重试还有问题
 local function testwatch(etcd_cli)
     skynet.fork(function()
         while true do
-            testwatchdir(etcd_cli)
+            local ok, err = xpcall(testwatchdir, debug.traceback, etcd_cli)
+			if not ok then
+				skynet.error("testwatch failed. err:", err)
+			end
             skynet.sleep(100)
         end
     end)
     skynet.fork(function()
         while true do
-            testwatchone(etcd_cli)
+            local ok, err = xpcall(testwatchone, debug.traceback, etcd_cli)
+			if not ok then
+				skynet.error("testwatch failed. err:", err)
+			end
             skynet.sleep(100)
         end
     end)
