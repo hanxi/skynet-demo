@@ -393,6 +393,7 @@ end
 ## etcd 模块
 
 - [x] 操作接口实现. 基于 <https://github.com/JieTrancender/skynet-etcd> 修改
+  - watch 接口参考 <https://github.com/sue602/lua-etcd> 实现
 - [ ] skynet cluster 服务发现
 
 ### etcd 服务配置示例

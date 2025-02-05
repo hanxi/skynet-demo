@@ -846,7 +846,9 @@ local watch_mt = {
         return body, nil, stream
     end,
     __close = function(self)
-        self.stream:close()
+		if self.stream then
+			self.stream:close()
+		end
     end,
 }
 
@@ -916,7 +918,7 @@ local function watch(self, key, attr)
 
     local watch_stream, err = _post_stream(self, URL_WATCH, body, attr and attr.timeout or self.timeout)
 	if err then
-		return nil, err
+		return setmetatable({}, watch_mt), err
 	end
     return setmetatable(watch_stream, watch_mt)
 end
