@@ -477,6 +477,11 @@ docker compose exec etcd1 etcdctl --user root --password 123456 put hello 1
 docker compose exec etcd1 etcdctl --user root --password 123456 put /foo/hanxi 1
 ```
 
+## 使用 typescript 编写服务
+
+一个玩具 <https://github.com/hanxi/bun-skynet>
+
+
 ## QQ 群
 
 群号 677839887
