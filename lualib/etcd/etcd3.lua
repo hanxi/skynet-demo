@@ -833,12 +833,12 @@ local watch_mt = {
         end
 
         for _, ev in ipairs(events) do
-            ev.kv.value = ev.kv.value and decode_base64(ev.kv.value) -- DELETE not have value
+            ev.kv.value = ev.kv.value and decode_json(decode_base64(ev.kv.value)) -- DELETE not have value
             ev.kv.key = decode_base64(ev.kv.key)
             ev.type = ev.type or "PUT"
 
             if ev.prev_kv then
-                ev.prev_kv.value = ev.prev_kv.value and decode_base64(ev.prev_kv.value)
+                ev.prev_kv.value = ev.prev_kv.value and decode_json(decode_base64(ev.prev_kv.value))
                 ev.prev_kv.key = decode_base64(ev.prev_kv.key)
             end
         end

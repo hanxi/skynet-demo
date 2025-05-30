@@ -1,5 +1,5 @@
 return {
-    gold = 1,
-    food = 2,
-    foodx = 2,
+    gold = 100,
+    food = 200,
+    foodx = 200,
 }

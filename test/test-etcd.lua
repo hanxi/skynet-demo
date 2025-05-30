@@ -180,7 +180,7 @@ local function testwatchdir(etcd_cli)
 
     for ret, werr, stream in watch_fun do
         for _, ev in ipairs(ret.result.events or {}) do
-            skynet.error(string.format("watchdir type:%s key:%s value:%s", ev.type, ev.kv.key, ev.kv.value))
+            skynet.error(string.format("watchdir type:%s key:%s value:%s", ev.type, ev.kv.key, util_table.tostring(ev.kv.value)))
         end
     end
 end
@@ -194,7 +194,7 @@ local function testwatchone(etcd_cli)
 
     for ret, werr, stream in watch_fun do
         for _, ev in ipairs(ret.result.events or {}) do
-            skynet.error(string.format("watch type:%s key:%s value:%s", ev.type, ev.kv.key, ev.kv.value))
+            skynet.error(string.format("watch type:%s key:%s value:%s", ev.type, ev.kv.key, util_table.tostring(ev.kv.value)))
         end
     end
 end
