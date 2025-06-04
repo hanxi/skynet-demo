@@ -135,10 +135,11 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
 end
 
 local function _request_uri_stream(self, host, method, uri, opts, timeout, ignore_auth)
-    log_info("_request_uri_stream uri: ", uri, ", timeout: ", timeout)
+    log_info("_request_uri_stream uri: ", uri, ", timeout: ", timeout, ", ignore_auth:", ignore_auth)
 
     local ret, err = _request_pre(self, uri, opts, timeout, ignore_auth)
     if err then
+        log_info("_request_uri_stream _request_pre failed: ", err)
         return nil, err
     end
 
@@ -231,7 +232,7 @@ local function _post_stream(self, uri, body, timeout)
         report_failure(endpoint.http_host)
         return nil, err
     end
-    return { stream = err, endpoint = endpoint }
+    return { cli = self, stream = err, endpoint = endpoint }
 end
 
 local function serialize_and_encode_base64(data)
@@ -807,6 +808,9 @@ end -- do
 local watch_mt = {
     __call = function(self)
         local stream = self.stream
+        if not stream then
+            return nil, "stream not initialized"
+        end
 
         local resp = stream()
         if stream.status ~= 200 then
@@ -849,6 +853,9 @@ local watch_mt = {
 		if self.stream then
 			self.stream:close()
 		end
+        if self.cli then
+            self.cli.jwt_token = nil
+        end
     end,
 }
 

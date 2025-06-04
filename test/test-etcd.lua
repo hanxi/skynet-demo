@@ -199,7 +199,6 @@ local function testwatchone(etcd_cli)
     end
 end
 
--- FIXME: 断线重试还有问题
 local function testwatch(etcd_cli)
     skynet.fork(function()
         while true do
