@@ -623,12 +623,15 @@ do
         compare[1] = {}
         compare[1].target = "CREATE"
         compare[1].key = encode_base64(key)
-        compare[1].createRevision = 0
+        compare[1].create_revision = 0
 
         clear_tab(success)
         success[1] = {}
         success[1].requestPut = {}
         success[1].requestPut.key = encode_base64(key)
+        if opts and opts.lease then
+            success[1].requestPut.lease = opts.lease
+        end
 
         local err
         val, err = serialize_and_encode_base64(val)
@@ -649,7 +652,7 @@ do
         compare[1] = {}
         compare[1].target = "CREATE"
         compare[1].key = encode_base64(key)
-        compare[1].createRevision = 0
+        compare[1].create_revision = 0
 
         clear_tab(failure)
         failure[1] = {}
@@ -664,6 +667,34 @@ do
         failure[1].requestPut.value = val
 
         return txn(self, opts, compare, nil, failure)
+    end
+
+    function _M.mod(self, key, val, opts)
+        clear_tab(compare)
+
+        key = get_real_key(self.key_prefix, key)
+
+        compare[1] = {}
+        compare[1].target = "MOD"
+        compare[1].key = encode_base64(key)
+        compare[1].mod_revision = opts.mod_revision
+
+        clear_tab(success)
+        success[1] = {}
+        success[1].requestPut = {}
+        success[1].requestPut.key = encode_base64(key)
+        if opts and opts.lease then
+            success[1].requestPut.lease = opts.lease
+        end
+
+        local err
+        val, err = serialize_and_encode_base64(val)
+        if not val then
+            return nil, "failed to encode val: " .. err
+        end
+        success[1].requestPut.value = val
+
+        return txn(self, opts, compare, success, nil)
     end
 end -- do
 
