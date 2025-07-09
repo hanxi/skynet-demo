@@ -110,7 +110,7 @@ local function _request_pre(self, uri, opts, timeout, ignore_auth)
 end
 
 local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
-    log_info("_request_uri uri: ", uri, ", timeout: ", timeout)
+    -- log_info("_request_uri uri: ", uri, ", timeout: ", timeout)
 
     local ret, err = _request_pre(self, uri, opts, timeout, ignore_auth)
     if err then
@@ -127,6 +127,7 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
         return nil, "insufficient credentials code: " .. status
     end
 
+    -- log_info("_request_uri response uri:", uri, ", status: ", status, ", body: ", body)
     if type(body) ~= "string" then
         return { status = status, body = body }
     end
@@ -135,7 +136,7 @@ local function _request_uri(self, host, method, uri, opts, timeout, ignore_auth)
 end
 
 local function _request_uri_stream(self, host, method, uri, opts, timeout, ignore_auth)
-    log_info("_request_uri_stream uri: ", uri, ", timeout: ", timeout, ", ignore_auth:", ignore_auth)
+    -- log_info("_request_uri_stream uri: ", uri, ", timeout: ", timeout, ", ignore_auth:", ignore_auth)
 
     local ret, err = _request_pre(self, uri, opts, timeout, ignore_auth)
     if err then
@@ -201,6 +202,7 @@ local function _post(self, uri, body, timeout, ignore_auth)
         return nil, err
     end
 
+    timeout = timeout or 5
     local ok, err = xpcall(
         _request_uri,
         debug.traceback,
@@ -226,6 +228,8 @@ local function _post_stream(self, uri, body, timeout)
     if not endpoint then
         return nil, err
     end
+
+    timeout = timeout or 5
     local ok, err =
         xpcall(_request_uri_stream, debug.traceback, self, endpoint.http_host, "POST", uri, { body = body }, timeout)
     if not ok then
@@ -391,9 +395,9 @@ local function set(self, key, val, attr)
         return nil, err
     end
 
-    if res.status < 300 then
-        log_info("v3 set body: ", encode_json(res.body))
-    end
+    -- if res.status < 300 then
+    --     log_info("v3 set body: ", encode_json(res.body))
+    -- end
 
     return res, nil
 end
@@ -510,6 +514,8 @@ local function delete(self, key, attr)
     local range_end
     if attr.range_end then
         range_end = encode_base64(attr.range_end)
+    else
+        range_end = encode_base64(default_key_range_end(key))
     end
 
     local prev_kv
@@ -544,7 +550,7 @@ local function txn(self, opts_arg, compare, success, failure)
         failure = failure,
     }
 
-    return _post(self, URL_TXN, body, timeout or self.time)
+    return _post(self, URL_TXN, body, timeout or self.timeout)
 end
 
 local function get_range_end(key)
@@ -755,7 +761,7 @@ function _M.grant(self, ttl, id)
         ID = id,
     }
 
-    return _post(self, URL_GRANT, body)
+    return _post(self, URL_GRANT, body, self.timeout)
 end
 
 function _M.revoke(self, id)
@@ -767,7 +773,7 @@ function _M.revoke(self, id)
         ID = id,
     }
 
-    return _post(self, URL_REVOKE, body)
+    return _post(self, URL_REVOKE, body, self.timeout)
 end
 
 function _M.keepalive(self, id)
@@ -779,7 +785,7 @@ function _M.keepalive(self, id)
         ID = id,
     }
 
-    return _post(self, URL_KEEPALIVE, opts)
+    return _post(self, URL_KEEPALIVE, body, self.timeout)
 end
 
 function _M.timetolive(self, id, keys)
@@ -794,7 +800,7 @@ function _M.timetolive(self, id, keys)
     }
 
     local res
-    res, err = _post(self, URL_TIMETOLIVE, body)
+    res, err = _post(self, URL_TIMETOLIVE, body, self.timeout)
     if res and res.status == 200 then
         if res.body.keys and next(res.body.keys) then
             for i, key in ipairs(res.body.keys) do
@@ -807,7 +813,7 @@ function _M.timetolive(self, id, keys)
 end
 
 function _M.leases(self)
-    return _post(self, URL_LEASES)
+    return _post(self, URL_LEASES, nil, self.timeout)
 end
 
 do
@@ -881,9 +887,9 @@ local watch_mt = {
         return body, nil, stream
     end,
     __close = function(self)
-		if self.stream then
-			self.stream:close()
-		end
+        if self.stream then
+            self.stream:close()
+        end
         if self.cli then
             self.cli.jwt_token = nil
         end
@@ -955,9 +961,9 @@ local function watch(self, key, attr)
     }
 
     local watch_stream, err = _post_stream(self, URL_WATCH, body, attr and attr.timeout or self.timeout)
-	if err then
-		return setmetatable({}, watch_mt), err
-	end
+    if err then
+        return setmetatable({}, watch_mt), err
+    end
     return setmetatable(watch_stream, watch_mt)
 end
 
