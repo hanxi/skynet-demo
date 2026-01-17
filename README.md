@@ -2,6 +2,7 @@
 
 ## 广告
 
+- 如果你在找一个更完整的 skynet 游戏服务器，可以看看 <https://github.com/hanxi/skyext>
 - 爱发电: <https://afdian.net/a/imhanxi>
 
 ## 编译
